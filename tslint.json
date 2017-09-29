@@ -57,6 +57,12 @@
         "no-string-literal": false,
         "no-string-throw": true,
         "no-empty-line-after-opening-brace": true,
-        "no-function-expression": true
+        "no-function-expression": true,
+        "typedef": [
+          true,
+          "parameter",
+          "property-declaration",
+          "member-variable-declaration"
+        ]
     }
 }
