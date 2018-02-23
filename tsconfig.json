@@ -1,6 +1,8 @@
 {
     "compilerOptions": {
         "declaration": true,
+        "forceConsistentCasingInFileNames": true,
+        "allowSyntheticDefaultImports": true,
         "strict": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
@@ -11,6 +13,7 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "suppressImplicitAnyIndexErrors": true,
+        "skipLibCheck": true,
         "module": "commonjs",
         "sourceMap": true,
         "target": "es5",
@@ -37,8 +40,7 @@
             "*": [
                 "./types/*"
             ]
-        },
-        "skipLibCheck": true
+        }
     },
     "exclude": [
         "node_modules",
