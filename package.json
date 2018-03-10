@@ -14,7 +14,7 @@
     "lint": "tslint -c tslint.json --project tsconfig.json \"src/**/*.ts\" \"test/**/*.ts\"",
     "docs": "typedoc --out docs/ --mode file --excludeNotExported -tsconfig tsconfig.json --target ES6",
     "fmt": "prettier --write **/*.ts",
-    "deps:update": "npm-check-updates -u"
+    "deps:update": "ncu -ua"
   },
   "engineStrict": true,
   "engines": {
@@ -29,6 +29,7 @@
     "@types/sinon-chai": "^2.7.29",
     "chai": "^4.1.2",
     "mocha": "^5.0.4",
+    "npm-check-updates": "^2.14.1",
     "rimraf": "^2.6.2",
     "sinon": "^4.4.2",
     "sinon-chai": "^3.0.0",
