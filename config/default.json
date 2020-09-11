@@ -1,0 +1,15 @@
+{
+    "allowedHosts": [
+        "127.0.0.1",
+        "localhost",
+        "::ffff:127.0.0.1"
+    ],
+    "categories": [
+        "avatar",
+        "world",
+        "gadget"
+    ],
+    "competition": "mmc",
+    "screenshotsPath": "C://",
+    "resultsPath": "results/"
+}
