@@ -9,7 +9,10 @@
         "world",
         "gadget"
     ],
-    "competition": "mmc",
+    "competitions": [
+        "mmc"
+    ],
     "screenshotsPath": "C://",
-    "resultsPath": "results/"
+    "resultsPath": "results/",
+    "dbPath":"db/"
 }
