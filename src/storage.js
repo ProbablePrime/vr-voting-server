@@ -10,7 +10,7 @@ function getStorageProvider(competition, category) {
         storageProviders[competition] = {};
     }
     if (!storageProviders[competition][category]) {
-        storageProviders[competition][category] = new Keyv(`sqlite://${dbPath}${competition}`, { namespace: category});
+        storageProviders[competition][category] = new Keyv(`sqlite://${dbPath}${competition}.db`, { namespace: category});
     }
     return storageProviders[competition][category];
 }
