@@ -7,7 +7,8 @@
   "main": "src/index.js",
   "scripts": {
     "fmt": "prettier --write **/*.ts",
-    "deps:update": "ncu -ua"
+    "deps:update": "ncu -ua",
+    "start": "node src/index.js"
   },
   "engineStrict": true,
   "engines": {
