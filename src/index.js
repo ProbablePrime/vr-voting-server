@@ -13,7 +13,7 @@ function validateVoteTarget(competition, category) {
     return competitions.contains(competition) && categories.contains(category);
 }
 
-const port = 3000;
+const port = config.get('port');
 
 const screenshotsPath = config.get('screenshotsPath');
 

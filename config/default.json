@@ -14,5 +14,6 @@
     ],
     "screenshotsPath": "C://",
     "resultsPath": "results/",
-    "dbPath":"db/"
+    "dbPath":"db/",
+    "port": 3000,
 }
