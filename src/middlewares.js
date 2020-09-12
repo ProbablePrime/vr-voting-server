@@ -1,14 +1,11 @@
 const localhost = require('local-hostname');
 const config = require('config');
 
+const responses = require('./responses');
+
 const allowedHosts = config.get('allowedHosts');
 
 const paramsOrder = ['userId', 'machineId', 'username', 'rawTimestamp', 'sessionId', 'voteTarget'];
-
-function no(res) {
-    res.statusCode = 401;
-    res.end('Not Authorized');
-}
 
 function convertArray(paramsKey, body) {
     if (body.length !== paramsKey.length) {
@@ -23,12 +20,12 @@ function convertArray(paramsKey, body) {
 
 
 // Converts the body to JSON, This is sad but Neos doesn't support JSON so there we go
-// TODO, we need different schemas per endpoints so we should handle that here, the idea is that the main code doesn't
+// TODO - AFTER MMC, we need different schemas per endpoints so we should handle that here, the idea is that the main code doesn't
 // need to know that Neos can't do JSON.
 const parseBodyMiddleware = (req, res, next) => {
     if (typeof req.body !== 'string') {
-        res.statusCode = 400;
-        res.end('Invalid Request Body');
+        responses.badRequest(res, 'Invalid Request Body');
+        return;
     }
     const body = req.body;
 
@@ -54,7 +51,7 @@ const authorizeMiddleware = (req, res, next) => {
     // This isn't really that secure, we need more checks for if this is a proxied request
     if (req.headers['x-forwarded-for']) {
         //bail here
-        no(res);
+        responses.forbidden(res);
         return;
     }
     // This can't really be trusted until our proxy checks are done
@@ -65,7 +62,7 @@ const authorizeMiddleware = (req, res, next) => {
     // These are stored in the config file
     if (!allowedHosts.includes(ip)) {
         console.log(`Blocking request from ${ip}`);
-        no(res);
+        responses.forbidden(res);
         // bail here
         return;
     }

@@ -34,7 +34,12 @@ async function handleVote(req, res) {
     const incomingVote = req.incomingVote;
 
     // We'll get the Neos User from the Neos API, this checks that they are a valid user, we also get their registration date
-    const neosUser = await fetchNeosUser(incomingVote.userId);
+    try {
+        const neosUser = await fetchNeosUser(incomingVote.userId);
+    } catch(e) {
+        responses.serverError(res);
+        return;
+    }
 
     // Yeah this means something has gone wrong somewhere BAI.
     if (neosUser.username !== incomingVote.username) {
@@ -43,10 +48,14 @@ async function handleVote(req, res) {
     }
 
     // Here we check, have they voted in this category before, we use the id retrieved from the Neos API as it can be trusted a little more.
-    const hasVoted = await storage.hasVoted(competition, category, neosUser.id);
-    if (hasVoted) {
-        responses.forbidden(res, `User has already voted in the ${competition} competition and ${category} category`);
-        return;
+    try {
+        const hasVoted = await storage.hasVoted(competition, category, neosUser.id);
+        if (hasVoted) {
+            responses.forbidden(res, `User has already voted in the ${competition} competition and ${category} category`);
+            return;
+        }
+    } catch (e) {
+        responses.serverError(res);
     }
 
     // Construct the vote, could probably just base this on the incoming vote but I don't want that to have junk so we'll construct that.
@@ -86,8 +95,7 @@ async function handleVote(req, res) {
     }
 
     // This marks the "Everything is ok mark" past here everything is fine and we don't need to worry.
-    res.statusCode = 200;
-    res.end('Vote Cast,thank you');
+    responses.ok('Vote Cast,thank you');
 }
 
 module.exports = handleVote;

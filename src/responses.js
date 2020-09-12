@@ -15,6 +15,10 @@ function forbidden(res, msg ='Forbidden') {
     respond(res, msg, 403);
 }
 
+function ok(res, msg = 'Ok') {
+    respond(res, msg, 200);
+}
+
 function respond(res, msg, code) {
     res.statusCode = code;
     res.end(msg);
@@ -24,5 +28,6 @@ module.exports = {
     serverError,
     notAuthorized,
     badRequest,
-    forbidden
+    forbidden,
+    ok
 };
