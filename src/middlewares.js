@@ -1,6 +1,7 @@
 const localhost = require('local-hostname');
 const config = require('config');
 
+const log = require('./log');
 const responses = require('./responses');
 
 const allowedHosts = config.get('allowedHosts');
@@ -17,6 +18,11 @@ function convertArray(paramsKey, body) {
     });
     return ret;
 }
+
+const logStartMiddleware = (req, res, next) => {
+    log.info(`New request for ${req.method}, ${req.url}`);
+    next();
+};
 
 
 // Converts the body to JSON, This is sad but Neos doesn't support JSON so there we go
@@ -44,13 +50,15 @@ const parseBodyMiddleware = (req, res, next) => {
     // Store the vote in the request so that other parts can pick it up
     req.incomingVote = vote;
 
+    log.info('Successfully parsed Neos Incoming vote');
     next();
-}
+};
 
 const authorizeMiddleware = (req, res, next) => {
     // This isn't really that secure, we need more checks for if this is a proxied request
     if (req.headers['x-forwarded-for']) {
         //bail here
+        log.warn('Blocking forwarded request because it is likely a proxied request');
         responses.forbidden(res);
         return;
     }
@@ -61,12 +69,12 @@ const authorizeMiddleware = (req, res, next) => {
     }
     // These are stored in the config file
     if (!allowedHosts.includes(ip)) {
-        console.log(`Blocking request from ${ip}`);
+        log.warn(`Blocking request from ${ip} it is not on the allow list`);
         responses.forbidden(res);
         // bail here
         return;
     }
     next();
-}
+};
 
-module.exports = { authorizeMiddleware, parseBodyMiddleware};
+module.exports = { logStartMiddleware, authorizeMiddleware, parseBodyMiddleware};

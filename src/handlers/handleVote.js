@@ -11,24 +11,20 @@ const competitions = config.get('competitions');
 const categories = config.get('categories');
 
 function validateVoteTarget(competition, category) {
-    console.log(competition);
-    console.log(competition.length, competitions.length);
-    console.log(competitions.includes(competition), categories.includes(category));
-    console.log(competitions);
     return competitions.includes(competition) && categories.includes(category);
 }
 
 // TODO: Move to file
 async function handleVote(req, res) {
-
     // These come from the URL path, which is nice!
     const competition = req.params.competition;
     const category = req.params.category;
-    log.info(`New request for ${competition} and ${category}`);
+
+    log.info(`Voting request for ${competition} and ${category}`);
 
     // These come from the URL so i'm scared that they might be wrong or malicious, here we check if the categories and competitions are valid.
     if (!validateVoteTarget(competition, category)) {
-        console.log(competition, category);
+        log.info('Blocking request for invalid competition or category');
         responses.badRequest(res, 'Invalid competition or category, Goodbye');
         return;
     }
@@ -40,6 +36,8 @@ async function handleVote(req, res) {
     try {
         neosUser = await fetchNeosUser(incomingVote.userId);
     } catch(e) {
+        log.error('Failed to fetch Neos User from neos API');
+        log.error(e);
         responses.serverError(res);
         return;
     }
@@ -54,10 +52,13 @@ async function handleVote(req, res) {
     try {
         const hasVoted = await storage.hasVoted(competition, category, neosUser.id);
         if (hasVoted) {
+            log.info(`Blocking request for ${neosUser.username} who has already voted in ${competition} and ${category}`);
             responses.forbidden(res, `User has already voted in the ${competition} competition and ${category} category`);
             return;
         }
     } catch (e) {
+        log.error('Failed to check voting status');
+        log.error(e);
         responses.serverError(res);
     }
 
@@ -79,24 +80,28 @@ async function handleVote(req, res) {
     // Here begins the lovely try catch area, so we don't want the server to crash so that's why we're try catching everywhere
     try {
         // Store the CSV Result
+        log.info(`Recording vote in csv for ${competition}->${category} and ${vote.username}`);
         await results.storeResult(vote);
     } catch (e) {
         // This means we screwed up somehow we log the error and then we bail out, we don't mark their vote as cast
-        console.log(e);
+        log.error(`Failed to save vote to CSV for ${competition}->${category} and ${vote.username}`);
+        log.error(e);
         responses.serverError(res);
         return;
     }
     try {
         // Here we store their vote, this prevents them from voting for this competition and category ever again
+        log.info(`Storing the fact that the user's vote has been recorded for ${competition}->${category} and ${vote.username}`);
         await storage.storeVoteState(vote.competition, vote.category, vote.userId);
     } catch (e) {
         // This means we screwed up somehow we log the error and then we bail out, this is the worst outcome as we're unsure if their vote has been marked
         // We'll log this to a file and then we can check later, they should be in the CSV at this point anyway...
-        console.log(e);
+        log.fatal(`Failed to store saved voting state, this will need to be checked`);
+        log.fatal(e);
         responses.serverError(res);
         return;
     }
-
+    log.info(`Stored successful vote for ${competition}->${category} and ${vote.username}`);
     // This marks the "Everything is ok mark" past here everything is fine and we don't need to worry.
     responses.ok(res, 'Vote Cast,thank you');
 }
