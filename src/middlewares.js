@@ -24,7 +24,6 @@ const logStartMiddleware = (req, res, next) => {
     next();
 };
 
-
 // Converts the body to JSON, This is sad but Neos doesn't support JSON so there we go
 // TODO - AFTER MMC, we need different schemas per endpoints so we should handle that here, the idea is that the main code doesn't
 // need to know that Neos can't do JSON.
