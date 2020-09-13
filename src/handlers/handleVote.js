@@ -14,7 +14,7 @@ function validateVoteTarget(competition, category) {
     return competitions.includes(competition) && categories.includes(category);
 }
 
-// TODO: Move to file
+
 async function handleVote(req, res) {
     // These come from the URL path, which is nice!
     const competition = req.params.competition;
