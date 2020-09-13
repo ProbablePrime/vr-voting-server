@@ -2,6 +2,7 @@
 #### node ####
 # Logs
 logs
+!logs/.keep
 *.log
 npm-debug.log*
 
