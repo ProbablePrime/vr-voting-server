@@ -33,15 +33,19 @@ async function handleVote(req, res) {
 
     // We'll get the Neos User from the Neos API, this checks that they are a valid user, we also get their registration date
     let neosUser;
-    try {
-        neosUser = await fetchNeosUser(incomingVote.userId);
-    } catch(e) {
-        log.error('Failed to fetch Neos User from neos API');
-        log.error(e);
-        responses.serverError(res);
-        return;
+    if (competition !== 'test') {
+        try {
+            neosUser = await fetchNeosUser(incomingVote.userId);
+        } catch(e) {
+            log.error('Failed to fetch Neos User from neos API');
+            log.error(e);
+            responses.serverError(res);
+            return;
+        }
+    } else {
+        neosUser = {username: incomingVote.username, id:incomingVote.userId, registrationDate: new Date() };
     }
-
+    console.log(incomingVote);
     // Yeah this means something has gone wrong somewhere BAI.
     if (neosUser.username !== incomingVote.username) {
         responses.notAuthorized(res,'Invalid Request');
@@ -64,15 +68,25 @@ async function handleVote(req, res) {
 
     // Construct the vote, could probably just base this on the incoming vote but I don't want that to have junk so we'll construct that.
     const vote = {};
+
+    // Competition, category, voteTarget
     vote.competition = competition;
+    vote.category = category;
+    vote.voteTarget = incomingVote.voteTarget;
+
+    // Username, userId, machineId, Registration date
     vote.username = neosUser.username;
     vote.userId = neosUser.id;
     vote.machineId = incomingVote.machineId;
-    vote.sessionId = incomingVote.sessionId;
+    vote.registrationDate = new Date(neosUser.registrationDate);
+
+    // Received timestamp, arrived timestamp, session id
     vote.receivedTimestamp = incomingVote.receivedTimestamp;
     vote.arrivedTimeStamp = incomingVote.arrivedTimeStamp;
-    vote.voteTarget = incomingVote.voteTarget;
-    vote.category = category;
+    vote.sessionId = incomingVote.sessionId;
+
+    // This will be the final CSV ordering
+    // Competition, category, voteTarget, Username, userId, machineId, Registration date,Received timestamp, arrived timestamp, session id
 
     // Freeze the Object, before we start messing with it. This doesn't do much but i put it here and i don't remember why.
     Object.freeze(vote);

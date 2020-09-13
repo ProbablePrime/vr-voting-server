@@ -10,7 +10,8 @@
         "gadget"
     ],
     "competitions": [
-        "mmc"
+        "mmc",
+        "test"
     ],
     "screenshotsPath": "C://",
     "resultsPath": "results/",
