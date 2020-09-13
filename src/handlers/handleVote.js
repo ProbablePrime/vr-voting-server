@@ -1,14 +1,14 @@
 const config = require('config');
 
+
+const log = require('../log');
+const { fetchNeosUser } = require('../neosapi');
+const responses = require('../responses');
 const results = require('../results');
 const storage = require('../storage');
 
-const responses = require('../responses');
-
 const competitions = config.get('competitions');
 const categories = config.get('categories');
-
-const { fetchNeosUser } = require('../neosapi');
 
 function validateVoteTarget(competition, category) {
     console.log(competition);
@@ -20,9 +20,11 @@ function validateVoteTarget(competition, category) {
 
 // TODO: Move to file
 async function handleVote(req, res) {
+
     // These come from the URL path, which is nice!
     const competition = req.params.competition;
     const category = req.params.category;
+    log.info(`New request for ${competition} and ${category}`);
 
     // These come from the URL so i'm scared that they might be wrong or malicious, here we check if the categories and competitions are valid.
     if (!validateVoteTarget(competition, category)) {
@@ -34,8 +36,9 @@ async function handleVote(req, res) {
     const incomingVote = req.incomingVote;
 
     // We'll get the Neos User from the Neos API, this checks that they are a valid user, we also get their registration date
+    let neosUser;
     try {
-        const neosUser = await fetchNeosUser(incomingVote.userId);
+        neosUser = await fetchNeosUser(incomingVote.userId);
     } catch(e) {
         responses.serverError(res);
         return;
@@ -95,7 +98,7 @@ async function handleVote(req, res) {
     }
 
     // This marks the "Everything is ok mark" past here everything is fine and we don't need to worry.
-    responses.ok('Vote Cast,thank you');
+    responses.ok(res, 'Vote Cast,thank you');
 }
 
 module.exports = handleVote;
