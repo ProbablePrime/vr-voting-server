@@ -53,7 +53,7 @@ async function handleVote(req, res) {
         const hasVoted = await storage.hasVoted(competition, category, neosUser.id);
         if (hasVoted) {
             log.info(`Blocking request for ${neosUser.username} who has already voted in ${competition} and ${category}`);
-            responses.forbidden(res, `User has already voted in the ${competition} competition and ${category} category`);
+            responses.forbidden(res, `${neosUser.username} has already voted in the ${competition} competition and ${category} category`);
             return;
         }
     } catch (e) {
@@ -80,18 +80,18 @@ async function handleVote(req, res) {
     // Here begins the lovely try catch area, so we don't want the server to crash so that's why we're try catching everywhere
     try {
         // Store the CSV Result
-        log.info(`Recording vote in csv for ${competition}->${category} and ${vote.username}`);
+        log.info(`Recording vote in csv for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
         await results.storeResult(vote);
     } catch (e) {
         // This means we screwed up somehow we log the error and then we bail out, we don't mark their vote as cast
-        log.error(`Failed to save vote to CSV for ${competition}->${category} and ${vote.username}`);
+        log.error(`Failed to save vote to CSV for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
         log.error(e);
         responses.serverError(res);
         return;
     }
     try {
         // Here we store their vote, this prevents them from voting for this competition and category ever again
-        log.info(`Storing the fact that the user's vote has been recorded for ${competition}->${category} and ${vote.username}`);
+        log.info(`Storing the fact that the user's vote has been recorded for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
         await storage.storeVoteState(vote.competition, vote.category, vote.userId);
     } catch (e) {
         // This means we screwed up somehow we log the error and then we bail out, this is the worst outcome as we're unsure if their vote has been marked
@@ -101,7 +101,7 @@ async function handleVote(req, res) {
         responses.serverError(res);
         return;
     }
-    log.info(`Stored successful vote for ${competition}->${category} and ${vote.username}`);
+    log.info(`Stored successful vote for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
     // This marks the "Everything is ok mark" past here everything is fine and we don't need to worry.
     responses.ok(res, 'Vote Cast,thank you');
 }

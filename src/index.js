@@ -9,8 +9,7 @@ const {logStartMiddleware, authorizeMiddleware, parseBodyMiddleware} = require('
 
 const port = config.get('port');
 
-
-log.info('Starting voting server on port', port);
+log.info('Starting voting server on port ', port);
 
 // Starts the webserver, has the authorize and parse body middlewares which handle neos stuff.
 polka()
