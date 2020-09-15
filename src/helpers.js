@@ -1,11 +1,12 @@
 const config = require('config');
 
 function convertArray(paramsKey, body) {
+    console.log(body.length, paramsKey.length);
     if (body.length !== paramsKey.length) {
         throw new Error('Invalid Request Body');
     }
     const ret = {};
-    paramsOrder.forEach((value,index) => {
+    paramsKey.forEach((value,index) => {
         ret[value] = body[index];
     });
     return ret;

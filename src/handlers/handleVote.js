@@ -5,7 +5,7 @@ const { fetchNeosUser } = require('../neosapi');
 const responses = require('../responses');
 const results = require('../results');
 const storage = require('../storage');
-const helpers = require('./helpers')
+const helpers = require('../helpers')
 
 const paramsOrder = ['voteTarget', 'username', 'userId', 'machineId', 'sessionId','rawTimestamp'];
 
@@ -14,7 +14,6 @@ const paramsOrder = ['voteTarget', 'username', 'userId', 'machineId', 'sessionId
  - Double check helpers file because you edited that
  - Finish the has Voted route
 */
-
 
 async function handleVote(req, res) {
     const body = req.body;
@@ -27,17 +26,18 @@ async function handleVote(req, res) {
     try {
         incomingVote = helpers.convertArray(paramsOrder, bodyArray);
     } catch (e) {
+        console.log(e);
         log.warn('Invalid request body received, ignoring: ', body);
         responses.badRequest(res, 'Invalid Request Body');
         return;
     }
 
     // Converts and stores our dates. This will fail if rawTimestamp is an invalid date, TODO CATCH THIS
-    incomingVote.receivedTimestamp = new Date(vote.rawTimestamp);
+    incomingVote.receivedTimestamp = new Date(incomingVote.rawTimestamp);
     incomingVote.arrivedTimeStamp = new Date();
 
     // Freeze this, Don't remember why
-    Object.freeze(incomingVote)
+    Object.freeze(incomingVote);
 
     log.info('Successfully parsed Neos Incoming vote');
 
@@ -68,7 +68,7 @@ async function handleVote(req, res) {
     } else {
         neosUser = {username: incomingVote.username, id:incomingVote.userId, registrationDate: new Date() };
     }
-    console.log(incomingVote);
+
     // Yeah this means something has gone wrong somewhere BAI.
     if (neosUser.username !== incomingVote.username) {
         responses.notAuthorized(res,'Invalid Request');
