@@ -1,46 +1,21 @@
 const config = require('config');
 
+
 const log = require('../log');
 const { fetchNeosUser } = require('../neosapi');
 const responses = require('../responses');
 const results = require('../results');
 const storage = require('../storage');
-const helpers = require('./helpers')
 
-const paramsOrder = ['voteTarget', 'username', 'userId', 'machineId', 'sessionId','rawTimestamp'];
+const competitions = config.get('competitions');
+const categories = config.get('categories');
 
-/*
- - Finish converting the parse body middleware which was moved to here because we're making more routes now.
- - Double check helpers file because you edited that
- - Finish the has Voted route
-*/
+function validateVoteTarget(competition, category) {
+    return competitions.includes(competition) && categories.includes(category);
+}
 
 
-async function handleVote(req, res) {
-    const body = req.body;
-
-    // Due to Neos' limited data handling this will be some form of CSV. We can't validate this easily but we can try some stuff.
-    const bodyArray = body.split(',');
-
-    let incomingVote = {};
-    // Converts an array to an object
-    try {
-        incomingVote = helpers.convertArray(paramsOrder, bodyArray);
-    } catch (e) {
-        log.warn('Invalid request body received, ignoring: ', body);
-        responses.badRequest(res, 'Invalid Request Body');
-        return;
-    }
-
-    // Converts and stores our dates. This will fail if rawTimestamp is an invalid date, TODO CATCH THIS
-    incomingVote.receivedTimestamp = new Date(vote.rawTimestamp);
-    incomingVote.arrivedTimeStamp = new Date();
-
-    // Freeze this, Don't remember why
-    Object.freeze(incomingVote)
-
-    log.info('Successfully parsed Neos Incoming vote');
-
+async function hasVoted(req, res) {
     // These come from the URL path, which is nice!
     const competition = req.params.competition;
     const category = req.params.category;
@@ -48,11 +23,13 @@ async function handleVote(req, res) {
     log.info(`Voting request for ${competition} and ${category}`);
 
     // These come from the URL so i'm scared that they might be wrong or malicious, here we check if the categories and competitions are valid.
-    if (!helpers.validateVoteTarget(competition, category)) {
+    if (!validateVoteTarget(competition, category)) {
         log.info('Blocking request for invalid competition or category');
         responses.badRequest(res, 'Invalid competition or category, Goodbye');
         return;
     }
+    // Middle wares have fixed up all the CSVs and stuff by converting them into JSON, we can access them here
+    const incomingVote = req.incomingVote;
 
     // We'll get the Neos User from the Neos API, this checks that they are a valid user, we also get their registration date
     let neosUser;
