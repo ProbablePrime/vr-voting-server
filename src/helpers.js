@@ -1,9 +1,8 @@
 const config = require('config');
 
 function convertArray(paramsKey, body) {
-    console.log(body.length, paramsKey.length);
     if (body.length !== paramsKey.length) {
-        throw new Error('Invalid Request Body');
+        throw new Error(`Invalid Request Body, Expected: ${paramsKey.length} params but got ${body.length} params.`);
     }
     const ret = {};
     paramsKey.forEach((value,index) => {
