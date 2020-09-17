@@ -11,8 +11,16 @@ function badRequest(res, msg = 'Bad Request') {
     respond(res, msg, 400);
 }
 
+function notFound(res, msg = 'Not Found') {
+    respond(res, msg, 404);
+}
+
 function forbidden(res, msg ='Forbidden') {
     respond(res, msg, 403);
+}
+
+function created(res, msg='Voted, Thank you') {
+    respond(res, msg, 201);
 }
 
 function ok(res, msg = 'Ok') {
@@ -29,5 +37,7 @@ module.exports = {
     notAuthorized,
     badRequest,
     forbidden,
-    ok
+    ok,
+    notFound,
+    created,
 };

@@ -1,8 +1,6 @@
 const config = require('config');
 
-
 const log = require('../log');
-const { fetchNeosUser } = require('../neosapi');
 const responses = require('../responses');
 const storage = require('../storage');
 const helpers = require('../helpers');
@@ -14,6 +12,7 @@ async function hasVoted(req, res) {
 
     log.info(`Has Voted request for ${competition} and ${category}`);
 
+    // This path uses query parameters
     if (!req.query.user) {
         log.warn('Ignoring invalid request with missing user id');
         responses.badRequest(res, 'Missing User Id');
@@ -35,11 +34,15 @@ async function hasVoted(req, res) {
         const hasVoted = await storage.hasVoted(competition, category, userId);
         const hasVotedResponse = hasVoted ? 'Voted' : 'Not Voted';
         log.info(`Successful vote state check for ${competition}->${category} and ${userId} state: ${hasVotedResponse}`);
-        responses.ok(res, hasVotedResponse)
+        if (hasVoted) {
+            responses.ok(res, hasVotedResponse);
+        } else {
+            responses.notFound(res, hasVotedResponse);
+        }
         return;
     } catch (e) {
         log.error('Failed to check voting status');
-        log.error(e);
+        log.error(e.message);
         responses.serverError(res);
     }
 }

@@ -34,7 +34,7 @@ async function handleVote(req, res) {
         return;
     }
 
-    // Converts and stores our dates. This will fail if rawTimestamp is an invalid date, TODO CATCH THIS
+    // Converts and stores our dates. This will fail if rawTimestamp is an invalid date
     try {
         incomingVote.receivedTimestamp = new Date(incomingVote.rawTimestamp);
         incomingVote.arrivedTimeStamp = new Date();
@@ -83,7 +83,7 @@ async function handleVote(req, res) {
     // If our username from Neos, doesn't match the username returned from the Neos API, it means something has gone wrong.
     // Yeah this means something has gone wrong somewhere BAI.
     if (neosUser.username !== incomingVote.username) {
-        log.warn('Rejecting request as the usernames from Neos dont match the usernames from Neos API');
+        log.warn(`Rejecting request as the usernames from Neos don't match the usernames from Neos API`);
         responses.notAuthorized(res,'Invalid Request, Vote not cast');
         return;
     }
@@ -153,7 +153,7 @@ async function handleVote(req, res) {
     }
     log.info(`Stored successful vote for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
     // This marks the "Everything is ok mark" past here everything is fine and we don't need to worry.
-    responses.ok(res, `Vote cast in ${category} for ${vote.voteTarget},thank you`);
+    responses.created(res, `Vote cast in ${category} for ${vote.voteTarget},thank you`);
 }
 
 module.exports = handleVote;
