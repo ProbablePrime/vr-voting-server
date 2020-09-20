@@ -31,9 +31,13 @@ async function hasVoted(req, res) {
 
     // Here we check, have they voted in this category before, we use the id retrieved from the Neos API as it can be trusted a little more.
     try {
+        // hasVoted returns a boolean from our data store.
         const hasVoted = await storage.hasVoted(competition, category, userId);
+        // converts has voted to a string which we use in the return
         const hasVotedResponse = hasVoted ? 'Voted' : 'Not Voted';
         log.info(`Successful vote state check for ${competition}->${category} and ${userId} state: ${hasVotedResponse}`);
+
+        // We use OK because OK means FOUND and not that it is OK for them to vote, in this case 404 or NOT FOUND, means VOTE NOT FOUND as in. YOU CAN VOTE!
         if (hasVoted) {
             responses.ok(res, hasVotedResponse);
         } else {
