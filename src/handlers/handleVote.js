@@ -9,12 +9,6 @@ const helpers = require('../helpers')
 
 const paramsOrder = ['voteTarget', 'username', 'userId', 'machineId', 'sessionId','rawTimestamp'];
 
-/*
- - Finish converting the parse body middleware which was moved to here because we're making more routes now.
- - Double check helpers file because you edited that
- - Finish the has Voted route
-*/
-
 async function handleVote(req, res) {
     // Body is the body of the request.
     const body = req.body;
