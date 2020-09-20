@@ -25,6 +25,12 @@ async function getVotedState(competition, category, userId) {
     return provider.get(userId);
 }
 
+async function deleteUser(competition, category, userId) {
+    console.log(arguments);
+    const provider = getStorageProvider(competition, category);
+    return provider.delete(userId);
+}
+
 async function hasVoted(competition, category, userId) {
     const value = await getVotedState(competition, category, userId);
     if (value === undefined || value === null) {
@@ -36,4 +42,5 @@ async function hasVoted(competition, category, userId) {
 module.exports = {
     storeVoteState,
     hasVoted,
+    deleteUser,
 }
