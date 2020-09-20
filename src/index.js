@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 
 const log = require('./log');
 const handleVote = require('./handlers/handleVote');
+const hasVoted = require('./handlers/hasVoted');
 
 const {logStartMiddleware, authorizeMiddleware, parseBodyMiddleware} = require('./middlewares');
 
@@ -16,8 +17,8 @@ polka()
     .use(bodyParser.text())
     .use(logStartMiddleware)
     .use(authorizeMiddleware)
-    .use(parseBodyMiddleware)
     .post('vote/:competition/:category', handleVote)
+    .get('vote/:competition/:category', hasVoted)
     .listen(port);
 
 log.info('Server started');

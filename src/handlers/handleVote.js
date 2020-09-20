@@ -1,21 +1,50 @@
 const config = require('config');
 
-
 const log = require('../log');
 const { fetchNeosUser } = require('../neosapi');
 const responses = require('../responses');
 const results = require('../results');
 const storage = require('../storage');
+const helpers = require('../helpers')
 
-const competitions = config.get('competitions');
-const categories = config.get('categories');
-
-function validateVoteTarget(competition, category) {
-    return competitions.includes(competition) && categories.includes(category);
-}
-
+const paramsOrder = ['voteTarget', 'username', 'userId', 'machineId', 'sessionId','rawTimestamp'];
 
 async function handleVote(req, res) {
+    // Body is the body of the request.
+    const body = req.body;
+
+    // Due to Neos' limited data handling this will be some form of CSV. We can't validate this easily but we can try some stuff.
+    const bodyArray = body.split(',');
+
+    // Init this here so we can mess with it later
+    let incomingVote = {};
+
+    // Basically converts an array to an object
+    try {
+        incomingVote = helpers.convertArray(paramsOrder, bodyArray);
+    } catch (e) {
+        log.warn(e.message);
+        responses.badRequest(res, 'Invalid Request Body');
+        return;
+    }
+
+    // Converts and stores our dates. This will fail if rawTimestamp is an invalid date
+    try {
+        incomingVote.receivedTimestamp = new Date(incomingVote.rawTimestamp);
+        incomingVote.arrivedTimeStamp = new Date();
+    } catch (e) {
+        log.warn('Error processing timestamps from request');
+        log.warn(e.message);
+        responses.badRequest('Error processing timestamps in vote request, your vote has not been cast.');
+        return;
+    }
+
+    // Freeze this, it prevents us from modifying it later or from further user input from modifying it.
+    Object.freeze(incomingVote);
+
+    // Lots of crap can go wrong before we get here, let's let the log file know it was successful. EVERYTHING IS OK ALARM!!
+    log.info('Successfully parsed Neos Incoming vote');
+
     // These come from the URL path, which is nice!
     const competition = req.params.competition;
     const category = req.params.category;
@@ -23,32 +52,33 @@ async function handleVote(req, res) {
     log.info(`Voting request for ${competition} and ${category}`);
 
     // These come from the URL so i'm scared that they might be wrong or malicious, here we check if the categories and competitions are valid.
-    if (!validateVoteTarget(competition, category)) {
+    if (!helpers.validateVoteTarget(competition, category)) {
         log.info('Blocking request for invalid competition or category');
         responses.badRequest(res, 'Invalid competition or category, Goodbye');
         return;
     }
-    // Middle wares have fixed up all the CSVs and stuff by converting them into JSON, we can access them here
-    const incomingVote = req.incomingVote;
 
     // We'll get the Neos User from the Neos API, this checks that they are a valid user, we also get their registration date
+    // The test logic here just allows me to test things. If the competition is my test competition we use dummy users.
     let neosUser;
     if (competition !== 'test') {
         try {
             neosUser = await fetchNeosUser(incomingVote.userId);
         } catch(e) {
-            log.error('Failed to fetch Neos User from neos API');
-            log.error(e);
+            log.warn('Failed to fetch Neos User from neos API');
+            log.warn(e.message);
             responses.serverError(res);
             return;
         }
     } else {
         neosUser = {username: incomingVote.username, id:incomingVote.userId, registrationDate: new Date() };
     }
-    console.log(incomingVote);
+
+    // If our username from Neos, doesn't match the username returned from the Neos API, it means something has gone wrong.
     // Yeah this means something has gone wrong somewhere BAI.
     if (neosUser.username !== incomingVote.username) {
-        responses.notAuthorized(res,'Invalid Request');
+        log.warn(`Rejecting request as the usernames from Neos don't match the usernames from Neos API`);
+        responses.notAuthorized(res,'Invalid Request, Vote not cast');
         return;
     }
 
@@ -61,7 +91,7 @@ async function handleVote(req, res) {
             return;
         }
     } catch (e) {
-        log.error('Failed to check voting status');
+        log.error('Failed to check voting status, your vote has not been cast');
         log.error(e);
         responses.serverError(res);
     }
@@ -110,14 +140,14 @@ async function handleVote(req, res) {
     } catch (e) {
         // This means we screwed up somehow we log the error and then we bail out, this is the worst outcome as we're unsure if their vote has been marked
         // We'll log this to a file and then we can check later, they should be in the CSV at this point anyway...
-        log.fatal(`Failed to store saved voting state, this will need to be checked`);
-        log.fatal(e);
+        log.error(`Failed to store saved voting state, this will need to be checked`);
+        log.error(e.message);
         responses.serverError(res);
         return;
     }
     log.info(`Stored successful vote for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
     // This marks the "Everything is ok mark" past here everything is fine and we don't need to worry.
-    responses.ok(res, 'Vote Cast,thank you');
+    responses.created(res, `Vote cast in ${category} for ${vote.voteTarget},thank you`);
 }
 
 module.exports = handleVote;

@@ -6,18 +6,6 @@ const responses = require('./responses');
 
 const allowedHosts = config.get('allowedHosts');
 
-const paramsOrder = ['userId', 'machineId', 'username', 'rawTimestamp', 'sessionId', 'voteTarget'];
-
-function convertArray(paramsKey, body) {
-    if (body.length !== paramsKey.length) {
-        throw new Error('Invalid Request Body');
-    }
-    const ret = {};
-    paramsOrder.forEach((value,index) => {
-        ret[value] = body[index];
-    });
-    return ret;
-}
 
 const logStartMiddleware = (req, res, next) => {
     log.info(`New request for ${req.method}, ${req.url}`);
@@ -32,24 +20,7 @@ const parseBodyMiddleware = (req, res, next) => {
         responses.badRequest(res, 'Invalid Request Body');
         return;
     }
-    const body = req.body;
 
-    // Due to Neos' limited data handling this will be some form of CSV. We can't validate this easily but we can try some stuff.
-    const bodyArray = body.split(',');
-    // Converts an array to an object
-    const vote = convertArray(paramsOrder, bodyArray);
-
-    // Converts and stores our dates. This will fail if rawTimestamp is an invalid date, TODO CATCH THIS
-    vote.receivedTimestamp = new Date(vote.rawTimestamp);
-    vote.arrivedTimeStamp = new Date();
-
-    // Freeze this, Don't remember why
-    Object.freeze(vote)
-
-    // Store the vote in the request so that other parts can pick it up
-    req.incomingVote = vote;
-
-    log.info('Successfully parsed Neos Incoming vote');
     next();
 };
 
