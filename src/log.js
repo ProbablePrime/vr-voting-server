@@ -1,4 +1,4 @@
-// this may seem simple but allows us to create and customize the logger later.
+// Creates a rolling log per hour for what's going on in the server. Read Simple-node-logger's docs for more info
 const SimpleLogger = require('simple-node-logger');
 
 const opts = {

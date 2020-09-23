@@ -1,4 +1,4 @@
-// Just a shortcut function
+// Just a series of shortcut functions which return various error codes. Lets me pick them up in logix more easily.
 function serverError(res, msg = 'Try again later, your vote has NOT been cast') {
     respond(res, msg, 500);
 }

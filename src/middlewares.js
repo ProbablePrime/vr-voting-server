@@ -12,32 +12,24 @@ const logStartMiddleware = (req, res, next) => {
     next();
 };
 
-// Converts the body to JSON, This is sad but Neos doesn't support JSON so there we go
-// TODO - AFTER MMC, we need different schemas per endpoints so we should handle that here, the idea is that the main code doesn't
-// need to know that Neos can't do JSON.
-const parseBodyMiddleware = (req, res, next) => {
-    if (typeof req.body !== 'string') {
-        responses.badRequest(res, 'Invalid Request Body');
-        return;
-    }
-
-    next();
-};
-
+// This basically checks if the IP/Host is local, It isn't secure at all but helps a little bit. Don't use it for anything security like
 const authorizeMiddleware = (req, res, next) => {
-    // This isn't really that secure, we need more checks for if this is a proxied request
+    // Checks if this request looks like a proxied request, this isn't good enough
     if (req.headers['x-forwarded-for']) {
         //bail here
         log.warn('Blocking forwarded request because it is likely a proxied request');
         responses.forbidden(res);
         return;
     }
-    // This can't really be trusted until our proxy checks are done
+
+    // Checks if this is a local address using a module
     const ip = req.socket.remoteAddress;
     if (localhost(ip)) {
         next();
     }
-    // These are stored in the config file
+
+    // Finally this allows us to override the above responses if we want to allow remote requests
+    // Also adds some weirder localhost ips that the above stuff doesn't look at
     if (!allowedHosts.includes(ip)) {
         log.warn(`Blocking request from ${ip} it is not on the allow list`);
         responses.forbidden(res);

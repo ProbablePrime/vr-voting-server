@@ -10,13 +10,16 @@ const helpers = require('../helpers')
 const paramsOrder = ['voteTarget', 'username', 'userId', 'machineId', 'sessionId','rawTimestamp'];
 
 async function handleVote(req, res) {
-    // Body is the body of the request.
+    // Body is the body of the request, in the case of a vote it contains the vote string from the voting system
     const body = req.body;
 
-    // Due to Neos' limited data handling this will be some form of CSV. We can't validate this easily but we can try some stuff.
+    // Due to Neos' limited data handling(COLLECTIONS PLEASE!!) this will be some form of CSV from the voting system.
+    // We can't validate this easily but we can try some stuff to double check it looks OK.
+    // Only the host can talk to this server by default so its generically OK to assume the data isn't bad.
+    // Don't use basically any of this with a non local web server OR do any sort of Identification/Authorization/Authentication or Payment stuff with this
     const bodyArray = body.split(',');
 
-    // Init this here so we can mess with it later
+    // Init this here so we can mess with it later, this lets the try catches work a little better
     let incomingVote = {};
 
     // Basically converts an array to an object
@@ -28,10 +31,14 @@ async function handleVote(req, res) {
         return;
     }
 
-    // Converts and stores our dates. This will fail if rawTimestamp is an invalid date
+    // Converts and stores our timestamps. This will fail if rawTimestamp is an invalid date but the error is caught
     try {
+        // This is the timestamp from Neos, when the request was constructed and sent.
         incomingVote.receivedTimestamp = new Date(incomingVote.rawTimestamp);
+        // This is the timestamp from the webserver, when it approximately receives the request.
         incomingVote.arrivedTimeStamp = new Date();
+        // Comparing both of these in the results file let's us see that the clocks are roughly in sync and that we're not backed up
+        // If these are out of date by a large mile then something fishy is going on, we should discount the result.
     } catch (e) {
         log.warn('Error processing timestamps from request');
         log.warn(e.message);
@@ -52,6 +59,7 @@ async function handleVote(req, res) {
     log.info(`Voting request for ${competition} and ${category}`);
 
     // These come from the URL so i'm scared that they might be wrong or malicious, here we check if the categories and competitions are valid.
+    // These are stored in the configuration file
     if (!helpers.validateVoteTarget(competition, category)) {
         log.info('Blocking request for invalid competition or category');
         responses.badRequest(res, 'Invalid competition or category, Goodbye');
@@ -85,8 +93,10 @@ async function handleVote(req, res) {
 
     // Here we check, have they voted in this category before, we use the id retrieved from the Neos API as it can be trusted a little more.
     try {
+        // Returns a boolean, seeing if the user has voted.
         const hasVoted = await storage.hasVoted(competition, category, neosUser.id);
         if (hasVoted) {
+            // Block the request because they have voted before.
             log.info(`Blocking request for ${neosUser.username} who has already voted in ${competition} and ${category}`);
             responses.forbidden(res, `${neosUser.username} has already voted in the ${competition} competition and ${category} category`);
             return;
