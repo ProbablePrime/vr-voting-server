@@ -39,4 +39,4 @@ const authorizeMiddleware = (req, res, next) => {
     next();
 };
 
-module.exports = { logStartMiddleware, authorizeMiddleware, parseBodyMiddleware};
+module.exports = { logStartMiddleware, authorizeMiddleware };
