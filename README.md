@@ -39,17 +39,6 @@ The MMC Competition has 3 Categories, A,B,C and Prime wants to vote, He can only
 
 Results are stored within: `results/<competition name.csv>`, it is formatted as a CSV file without headers. Before processing your results, COPY the file to another location. This server owns the file as it stands within this location and it will not tolerate extra columns, graphs, headers, tabs or anything else. COPY IT BEFORE MODIFICATION.
 
-    // Username, userId, machineId, Registration date
-    vote.username = neosUser.username;
-    vote.userId = neosUser.id;
-    vote.machineId = incomingVote.machineId;
-    vote.registrationDate = new Date(neosUser.registrationDate);
-
-    // Received timestamp, arrived timestamp, session id
-    vote.receivedTimestamp = incomingVote.receivedTimestamp;
-    vote.arrivedTimeStamp = incomingVote.arrivedTimeStamp;
-    vote.sessionId = incomingVote.sessionId;
-
 Results are the following properties in order:
 
 1. competition name - e.g. MMC
