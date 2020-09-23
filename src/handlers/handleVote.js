@@ -71,6 +71,7 @@ async function handleVote(req, res) {
             return;
         }
     } else {
+        // This only happens if the competition id is test.
         neosUser = {username: incomingVote.username, id:incomingVote.userId, registrationDate: new Date() };
     }
 

@@ -14,7 +14,7 @@ const port = config.get('port');
 
 log.info('Starting voting server on port ', port);
 
-// Starts the webserver, has the authorize and parse body middlewares which handle neos stuff.
+// Starts the webserver, with a configuration
 polka()
     .use(bodyParser.text())
     .use(logStartMiddleware)
@@ -22,7 +22,7 @@ polka()
     .post('vote/:competition/:category', handleVote)
     .get('vote/:competition/:category', hasVoted)
     .get('state', (req, res) => {
-        responses.ok('1');
+        responses.ok(res, '1');
         res.end();
     })
     .listen(port);
