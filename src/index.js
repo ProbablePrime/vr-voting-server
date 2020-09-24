@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const log = require('./log');
 const handleVote = require('./handlers/handleVote');
 const hasVoted = require('./handlers/hasVoted');
+const state = require('./handlers/state');
 
 const responses = require('./responses');
 
@@ -28,10 +29,7 @@ polka()
     .use(authorizeMiddleware)
     .post('vote/:competition/:category', handleVote)
     .get('vote/:competition/:category', hasVoted)
-    .get('state', (req, res) => {
-        responses.ok(res, '1');
-        res.end();
-    })
+    .get('state', state)
     .listen(port);
 
 log.info('Server started');
