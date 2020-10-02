@@ -66,6 +66,12 @@ async function handleVote(req, res) {
         return;
     }
 
+    // Is this entry blocked from voting?
+    if (helpers.isBlocked(incomingVote.voteTarget)) {
+        log.warn(`Blocking vote request with blocked vote target: ${incomingVote.voteTarget}`);
+        responses.forbidden(res, 'You cannot vote for this entry.');
+    }
+
     // We'll get the Neos User from the Neos API, this checks that they are a valid user, we also get their registration date
     // The test logic here just allows me to test things. If the competition is my test competition we use dummy users.
     let neosUser;

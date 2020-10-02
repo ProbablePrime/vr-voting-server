@@ -24,5 +24,11 @@ function validateVoteTarget(competition, category) {
     return competitions.includes(competition) && categories.includes(category);
 }
 
+// Simple includes check for if this vote target is blocked from voting in the config.
+const blocked = config.get('blocked');
+function isBlocked(voteTarget) {
+    return blocked.includes(voteTarget);
+}
 
-module.exports = { convertArray, validateVoteTarget };
+
+module.exports = { convertArray, validateVoteTarget, isBlocked };

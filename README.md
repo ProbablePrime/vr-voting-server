@@ -96,3 +96,7 @@ Sure Fork it and have fun, or submit PRs i'll review them and merge them if they
 ### Can you help me set this up/run a competition for me?
 
 Simple questions are fine yes, if you want a more comprehensive implementation or management please reach out to Prime who can discuss your options. You're still free to use this by yourself however you'd like.
+
+### Can I block entries from voting?
+
+Yes!, Add the entries vote targget(usually the world id) to the "blocked" array in the config file.
