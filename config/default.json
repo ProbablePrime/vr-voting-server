@@ -10,8 +10,7 @@
         "other"
     ],
     "competitions": [
-        "mmc",
-        "test"
+        "mmc"
     ],
     "screenshotsPath": "C://",
     "resultsPath": "results/",
