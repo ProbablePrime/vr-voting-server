@@ -100,3 +100,7 @@ Simple questions are fine yes, if you want a more comprehensive implementation o
 ### Can I block entries from voting?
 
 Yes!, Add the entries vote target(usually the world id) to the "blocked" array in the config file.
+
+### How many Mugs were harmed in the making of this?
+
+One :'(
