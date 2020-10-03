@@ -99,4 +99,4 @@ Simple questions are fine yes, if you want a more comprehensive implementation o
 
 ### Can I block entries from voting?
 
-Yes!, Add the entries vote targget(usually the world id) to the "blocked" array in the config file.
+Yes!, Add the entries vote target(usually the world id) to the "blocked" array in the config file.
