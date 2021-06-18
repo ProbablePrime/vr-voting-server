@@ -42,6 +42,8 @@ function collateResults(results) {
             target[result.vote] = 1;
         }
     });
+    categories.forEach(category => resultsTable[category] = Object.entries(resultsTable[category])
+    .sort(([,a],[,b]) => a-b).reverse());
     // Log everything yay
     console.log(resultsTable);
 }
