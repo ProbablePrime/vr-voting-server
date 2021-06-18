@@ -100,11 +100,11 @@ async function handleVote(req, res) {
     // Here we check, have they voted in this category before, we use the id retrieved from the Neos API as it can be trusted a little more.
     try {
         // Returns a boolean, seeing if the user has voted.
-        const hasVoted = await storage.hasVoted(competition, category, neosUser.id);
-        if (hasVoted) {
+        const isAtVotingLimit = await storage.isAtVotingLimit(competition, category, neosUser.id);
+        if (isAtVotingLimit) {
             // Block the request because they have voted before.
-            log.info(`Blocking request for ${neosUser.username} who has already voted in ${competition} and ${category}`);
-            responses.forbidden(res, `${neosUser.username} has already voted in the ${competition} competition and ${category} category`);
+            log.info(`Blocking request for ${neosUser.username} who has voted the maximum number of times in ${competition} and ${category}`);
+            responses.forbidden(res, `${neosUser.username} has voted the maximum number of times in the ${competition} competition and ${category} category`);
             return;
         }
     } catch (e) {
@@ -153,7 +153,7 @@ async function handleVote(req, res) {
     try {
         // Here we store their vote, this prevents them from voting for this competition and category ever again
         log.info(`Storing the fact that the user's vote has been recorded for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
-        await storage.storeVoteState(vote.competition, vote.category, vote.userId);
+        await storage.incrementVoteState(vote.competition, vote.category, vote.userId);
     } catch (e) {
         // This means we screwed up somehow we log the error and then we bail out, this is the worst outcome as we're unsure if their vote has been marked
         // We'll log this to a file and then we can check later, they should be in the CSV at this point anyway...
