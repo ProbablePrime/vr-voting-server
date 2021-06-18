@@ -76,8 +76,6 @@ function getVotingLimit(competition, category) {
     return limit;
 }
 
-
-
 module.exports = {
     storeVoteState,
     hasVoted,

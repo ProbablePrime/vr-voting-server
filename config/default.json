@@ -19,5 +19,6 @@
     "blocked": [
         "12345"
     ],
-    "logStatus": true
+    "logStatus": true,
+    "votingLimit": 5
 }

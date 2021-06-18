@@ -3,8 +3,6 @@ const responses = require('../responses');
 
 const config = require('config');
 
-
-
 function state(req, res) {
     if (req.query.sessionId) {
         log(`Got State request for Session Id: ${req.query.sessionId}`);
