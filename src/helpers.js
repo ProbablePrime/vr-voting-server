@@ -30,5 +30,4 @@ function isBlocked(voteTarget) {
     return blocked.includes(voteTarget);
 }
 
-
 module.exports = { convertArray, validateVoteTarget, isBlocked };

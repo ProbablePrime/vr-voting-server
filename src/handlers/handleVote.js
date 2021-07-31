@@ -3,11 +3,10 @@ const config = require('config');
 const log = require('../log');
 const { fetchNeosUser } = require('../neosapi');
 const responses = require('../responses');
-const results = require('../results');
 const storage = require('../storage');
 const helpers = require('../helpers')
 
-const paramsOrder = ['voteTarget', 'username', 'userId', 'machineId', 'sessionId','rawTimestamp'];
+const paramsOrder = ['entryId', 'username', 'userId', 'machineId', 'sessionId','rawTimestamp'];
 
 async function handleVote(req, res) {
     // Body is the body of the request, in the case of a vote it contains the vote string from the voting system
@@ -67,8 +66,8 @@ async function handleVote(req, res) {
     }
 
     // Is this entry blocked from voting?
-    if (helpers.isBlocked(incomingVote.voteTarget)) {
-        log.warn(`Blocking vote request with blocked vote target: ${incomingVote.voteTarget}`);
+    if (helpers.isBlocked(incomingVote.entryId)) {
+        log.warn(`Blocking vote request with blocked vote target: ${incomingVote.entryId}`);
         responses.forbidden(res, 'You cannot vote for this entry.');
     }
 
@@ -98,13 +97,14 @@ async function handleVote(req, res) {
     }
 
     // Here we check, have they voted in this category before, we use the id retrieved from the Neos API as it can be trusted a little more.
+    /// HAS VOTED FOR?
     try {
         // Returns a boolean, seeing if the user has voted.
-        const isAtVotingLimit = await storage.isAtVotingLimit(competition, category, neosUser.id);
-        if (isAtVotingLimit) {
+        const hasVoted = await storage.hasVoted(competition, neosUser.id, incomingVote.entryId);
+        if (hasVoted) {
             // Block the request because they have voted before.
-            log.info(`Blocking request for ${neosUser.username} who has voted the maximum number of times in ${competition} and ${category}`);
-            responses.forbidden(res, `${neosUser.username} has voted the maximum number of times in the ${competition} competition and ${category} category`);
+            log.info(`Blocking request for ${neosUser.username} and ${incomingVote.entryId}. They have voted before.`);
+            responses.forbidden(res, `${neosUser.username} has voted for this entry before`);
             return;
         }
     } catch (e) {
@@ -116,10 +116,9 @@ async function handleVote(req, res) {
     // Construct the vote, could probably just base this on the incoming vote but I don't want that to have junk so we'll construct that.
     const vote = {};
 
-    // Competition, category, voteTarget
     vote.competition = competition;
     vote.category = category;
-    vote.voteTarget = incomingVote.voteTarget;
+    vote.entryId = incomingVote.entryId;
 
     // Username, userId, machineId, Registration date
     vote.username = neosUser.username;
@@ -141,30 +140,19 @@ async function handleVote(req, res) {
     // Here begins the lovely try catch area, so we don't want the server to crash so that's why we're try catching everywhere
     try {
         // Store the CSV Result
-        log.info(`Recording vote in csv for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
-        await results.storeResult(vote);
+        log.info(`Recording vote in csv for ${competition}->${category}->${vote.entryId} and ${vote.username}`);
+        await storage.storeVote(vote);
     } catch (e) {
         // This means we screwed up somehow we log the error and then we bail out, we don't mark their vote as cast
-        log.error(`Failed to save vote to CSV for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
+        log.error(`Failed to save vote to CSV for ${competition}->${category}->${vote.entryId} and ${vote.username}`);
         log.error(e);
         responses.serverError(res);
         return;
     }
-    try {
-        // Here we store their vote, this prevents them from voting for this competition and category ever again
-        log.info(`Storing the fact that the user's vote has been recorded for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
-        await storage.incrementVoteState(vote.competition, vote.category, vote.userId);
-    } catch (e) {
-        // This means we screwed up somehow we log the error and then we bail out, this is the worst outcome as we're unsure if their vote has been marked
-        // We'll log this to a file and then we can check later, they should be in the CSV at this point anyway...
-        log.error(`Failed to store saved voting state, this will need to be checked`);
-        log.error(e.message);
-        responses.serverError(res);
-        return;
-    }
-    log.info(`Stored successful vote for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
+
+    log.info(`Stored successful vote for ${competition}->${category}->${vote.entryId} and ${vote.username}`);
     // This marks the "Everything is ok mark" past here everything is fine and we don't need to worry.
-    responses.created(res, `Vote cast in ${category} for ${vote.voteTarget},thank you`);
+    responses.created(res, `Vote cast in ${category} for ${vote.entryId},thank you`);
 }
 
 module.exports = handleVote;

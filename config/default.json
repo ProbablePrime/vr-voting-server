@@ -7,10 +7,11 @@
     "categories": [
         "avatar",
         "world",
-        "other"
+        "other",
+        "meme"
     ],
     "competitions": [
-        "mmc"
+        "mmc2021"
     ],
     "screenshotsPath": "C://",
     "resultsPath": "results/",
@@ -22,3 +23,17 @@
     "logStatus": true,
     "votingLimit": 5
 }
+
+
+“world”
+    “social”
+    “game”
+    “misc”
+“avatar”
+    “avatars”
+    “accessories”
+    “misc”
+“other”
+    “tools”, “apps”, “utilities”
+    “misc”
+“meme”

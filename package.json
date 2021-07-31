@@ -28,6 +28,7 @@
     "json2csv": "^5.0.1",
     "keyv": "^4.0.1",
     "local-hostname": "^0.1.0",
+    "nedb-promises": "^5.0.0",
     "node-fetch": "^2.6.1",
     "polka": "^0.5.2",
     "simple-node-logger": "^18.12.24"
