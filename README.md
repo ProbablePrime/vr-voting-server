@@ -104,3 +104,16 @@ Yes!, Add the entries vote target(usually the world id) to the "blocked" array i
 ### How many Mugs were harmed in the making of this?
 
 One :'(
+
+### 2021 Stuff
+
+- Two collections
+  - Votes
+  - Entries
+
+Entries is basically just an index, can we query an index?
+Lets look into Indexing.
+
+Otherwise we pair Entries to votes to perform querying
+Let's also mark votes from judges.
+We'll need a judge config with all of their userids.

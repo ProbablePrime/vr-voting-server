@@ -19,9 +19,32 @@ function convertArray(paramsKey, body) {
 
 const competitions = config.get('competitions');
 const categories = config.get('categories');
+const mainCategories = Object.keys(categories);
+
 // Is this a valid competition and category, uses the configuration files
-function validateVoteTarget(competition, category) {
-    return competitions.includes(competition) && categories.includes(category);
+function validateVoteTarget(competition, incomingCategories) {
+    return competitions.includes(competition) && validateCategories(incomingCategories);
+}
+
+function validateCategories(incomingCategories) {
+    if (!mainCategories.includes(incomingCategories.category)) return false;
+
+    const subcategories = categories[incomingCategories.category];
+    if(!subcategories.includes(incomingCategories.subcategory)) return false;
+
+    return true;
+}
+
+// Just a helper function to ensure we're getting these in a standard format that won't break anywhere else.
+function extractCategories(req) {
+    const ret = {};
+    if(req.category) {
+        ret.category = req.category;
+    }
+    if(req.subcategory) {
+        ret.subcategory = req.subcategory;
+    }
+    return ret;
 }
 
 // Simple includes check for if this vote target is blocked from voting in the config.
@@ -30,4 +53,4 @@ function isBlocked(voteTarget) {
     return blocked.includes(voteTarget);
 }
 
-module.exports = { convertArray, validateVoteTarget, isBlocked };
+module.exports = { convertArray, validateVoteTarget, isBlocked, extractCategories };

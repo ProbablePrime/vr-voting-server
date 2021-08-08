@@ -12,7 +12,7 @@ async function handleVote(req, res) {
     // Body is the body of the request, in the case of a vote it contains the vote string from the voting system
     const body = req.body;
 
-    // Due to Neos' limited data handling(COLLECTIONS PLEASE!!) this will be some form of CSV from the voting system.
+    // Due to Neos' limited data handling (COLLECTIONS PLEASE!!) this will be some form of CSV from the voting system.
     // We can't validate this easily but we can try some stuff to double check it looks OK.
     // Only the host can talk to this server by default so its generically OK to assume the data isn't bad.
     // Don't use basically any of this with a non local web server OR do any sort of Identification/Authorization/Authentication or Payment stuff with this
@@ -53,13 +53,13 @@ async function handleVote(req, res) {
 
     // These come from the URL path, which is nice!
     const competition = req.params.competition;
-    const category = req.params.category;
+    const categories = helpers.extractCategories(req);
 
-    log.info(`Voting request for ${competition} and ${category}`);
+    log.info(`Voting request for ${competition} and ${categories.category}:${categories.subcategory}`);
 
     // These come from the URL so i'm scared that they might be wrong or malicious, here we check if the categories and competitions are valid.
     // These are stored in the configuration file
-    if (!helpers.validateVoteTarget(competition, category)) {
+    if (!helpers.validateVoteTarget(competition, categories)) {
         log.info('Blocking request for invalid competition or category');
         responses.badRequest(res, 'Invalid competition or category, Goodbye');
         return;
@@ -117,7 +117,8 @@ async function handleVote(req, res) {
     const vote = {};
 
     vote.competition = competition;
-    vote.category = category;
+    vote.category = categories.category;
+    vote.subcategory = categories.subcategory;
     vote.entryId = incomingVote.entryId;
 
     // Username, userId, machineId, Registration date

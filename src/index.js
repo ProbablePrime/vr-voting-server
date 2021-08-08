@@ -27,8 +27,8 @@ polka()
     .use(bodyParser.text())
     .use(logStartMiddleware)
     .use(authorizeMiddleware)
-    .post('vote/:competition/:category', handleVote)
-    .get('vote/:competition/:category', hasVoted)
+    .post('vote/:competition/:category/:subcategory?', handleVote)
+    .get('vote/:competition/:category/:subcategory?', hasVoted)
     .get('state', state)
     .listen(port);
 

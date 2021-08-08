@@ -4,12 +4,25 @@
         "localhost",
         "::ffff:127.0.0.1"
     ],
-    "categories": [
-        "avatar",
-        "world",
-        "other",
-        "meme"
-    ],
+    "categories": {
+        "avatar": [
+            "avatars",
+            "accessories",
+            "misc"
+        ],
+        "world": [
+            "social",
+            "game",
+            "misc"
+        ],
+        "other": [
+            "tau",
+            "misc"
+        ],
+        "meme": [
+
+        ]
+    },
     "competitions": [
         "mmc2021"
     ],
@@ -23,17 +36,3 @@
     "logStatus": true,
     "votingLimit": 5
 }
-
-
-“world”
-    “social”
-    “game”
-    “misc”
-“avatar”
-    “avatars”
-    “accessories”
-    “misc”
-“other”
-    “tools”, “apps”, “utilities”
-    “misc”
-“meme”
