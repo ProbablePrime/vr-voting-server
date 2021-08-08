@@ -16,7 +16,6 @@ function convertArray(paramsKey, body) {
     return ret;
 }
 
-
 const competitions = config.get('competitions');
 const categories = config.get('categories');
 const mainCategories = Object.keys(categories);
@@ -26,11 +25,17 @@ function validateVoteTarget(competition, incomingCategories) {
     return competitions.includes(competition) && validateCategories(incomingCategories);
 }
 
+/*
+ * Categories got a little more complicated this year as we now have subcategories. This is ok as we now have code to check they are ok.
+ * one category "meme" doesn't have subcategories, so we just check if the config for a category has subcategories.
+ */
 function validateCategories(incomingCategories) {
+    // Invalid main category.
     if (!mainCategories.includes(incomingCategories.category)) return false;
 
+    // Check for invalid subcategories.
     const subcategories = categories[incomingCategories.category];
-    if(!subcategories.includes(incomingCategories.subcategory)) return false;
+    if(!subcategories.includes(incomingCategories.subcategory) && subcategories.length > 0) return false;
 
     return true;
 }
@@ -38,11 +43,11 @@ function validateCategories(incomingCategories) {
 // Just a helper function to ensure we're getting these in a standard format that won't break anywhere else.
 function extractCategories(req) {
     const ret = {};
-    if(req.category) {
-        ret.category = req.category;
+    if(req.params.category) {
+        ret.category = req.params.category;
     }
-    if(req.subcategory) {
-        ret.subcategory = req.subcategory;
+    if(req.params.subcategory) {
+        ret.subcategory = req.params.subcategory;
     }
     return ret;
 }

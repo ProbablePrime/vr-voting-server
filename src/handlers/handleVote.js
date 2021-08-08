@@ -61,7 +61,7 @@ async function handleVote(req, res) {
     // These are stored in the configuration file
     if (!helpers.validateVoteTarget(competition, categories)) {
         log.info('Blocking request for invalid competition or category');
-        responses.badRequest(res, 'Invalid competition or category, Goodbye');
+        responses.badRequest(res, 'Invalid competition or category settings. Your vote has not been cast');
         return;
     }
 
@@ -113,6 +113,22 @@ async function handleVote(req, res) {
         responses.serverError(res);
     }
 
+    try {
+        const entryRecorded = await storage.hasEntry(competition, incomingVote.entryId);
+        if (!entryRecorded) {
+            const res = await storage.storeEntry(competition, {
+                entryId: incomingVote.entryId,
+                category: categories.category || '',
+                subcategory: categories.subcategory || '',
+                blocked: false,
+            });
+        }
+    } catch (e) {
+        log.error('Failed to check entry status, your vote has not been cast');
+        log.error(e);
+        responses.serverError(res);
+    }
+
     // Construct the vote, could probably just base this on the incoming vote but I don't want that to have junk so we'll construct that.
     const vote = {};
 
@@ -132,28 +148,25 @@ async function handleVote(req, res) {
     vote.arrivedTimeStamp = incomingVote.arrivedTimeStamp;
     vote.sessionId = incomingVote.sessionId;
 
-    // This will be the final CSV ordering
-    // Competition, category, voteTarget, Username, userId, machineId, Registration date,Received timestamp, arrived timestamp, session id
-
     // Freeze the Object, before we start messing with it. This doesn't do much but i put it here and i don't remember why.
     Object.freeze(vote);
 
     // Here begins the lovely try catch area, so we don't want the server to crash so that's why we're try catching everywhere
     try {
         // Store the CSV Result
-        log.info(`Recording vote in csv for ${competition}->${category}->${vote.entryId} and ${vote.username}`);
-        await storage.storeVote(vote);
+        log.info(`Recording vote in csv for ${competition}->${vote.category}:${vote.subcategory}->${vote.entryId} and ${vote.username}`);
+        await storage.storeVote(competition, vote);
     } catch (e) {
         // This means we screwed up somehow we log the error and then we bail out, we don't mark their vote as cast
-        log.error(`Failed to save vote to CSV for ${competition}->${category}->${vote.entryId} and ${vote.username}`);
+        log.error(`Failed to save vote for ${competition}->${vote.category}:${vote.subcategory}->${vote.entryId} and ${vote.username}`);
         log.error(e);
         responses.serverError(res);
         return;
     }
 
-    log.info(`Stored successful vote for ${competition}->${category}->${vote.entryId} and ${vote.username}`);
+    log.info(`Stored successful vote for ${competition}->${vote.category}:${vote.subcategory}->${vote.entryId} and ${vote.username}`);
     // This marks the "Everything is ok mark" past here everything is fine and we don't need to worry.
-    responses.created(res, `Vote cast in ${category} for ${vote.entryId},thank you`);
+    responses.created(res, `Vote cast in ${vote.category}:${vote.subcategory} for ${vote.entryId},thank you`);
 }
 
 module.exports = handleVote;
