@@ -80,6 +80,7 @@ async function handleVote(req, res) {
     }
 
     // Is this entry blocked from voting?
+    // TODO: Re-write this use the new storage system.
     if (helpers.isBlocked(incomingVote.entryId)) {
         log.warn(
             `Blocking vote request with blocked vote target: ${incomingVote.entryId}`
@@ -187,9 +188,8 @@ async function handleVote(req, res) {
 
     // Here begins the lovely try catch area, so we don't want the server to crash so that's why we're try catching everywhere
     try {
-        // Store the CSV Result
         log.info(
-            `Recording vote in csv for ${competition}->${vote.category}:${vote.subcategory}->${vote.entryId} and ${vote.username}`
+            `Recording vote for ${competition}->${vote.category}:${vote.subcategory}->${vote.entryId} and ${vote.username}`
         );
         await storage.storeVote(competition, vote);
     } catch (e) {

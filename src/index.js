@@ -32,7 +32,7 @@ polka()
     .use(logStartMiddleware)
     .use(authorizeMiddleware)
     .post("vote/:competition/:category/:subcategory?", handleVote)
-    .get("vote/:competition/:category/:subcategory?", hasVoted)
+    .get("voted/:competition", hasVoted)
     .get("state", state)
     .listen(port);
 

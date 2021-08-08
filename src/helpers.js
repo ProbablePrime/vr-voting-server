@@ -25,9 +25,13 @@ const mainCategories = Object.keys(categories);
 // Is this a valid competition and category, uses the configuration files
 function validateVoteTarget(competition, incomingCategories) {
     return (
-        competitions.includes(competition) &&
+        validateCompetition(competition) &&
         validateCategories(incomingCategories)
     );
+}
+
+function validateCompetition(competition) {
+    return competitions.includes(competition);
 }
 
 /*
@@ -72,4 +76,5 @@ module.exports = {
     validateVoteTarget,
     isBlocked,
     extractCategories,
+    validateCompetition,
 };

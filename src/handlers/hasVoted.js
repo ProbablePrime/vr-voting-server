@@ -8,9 +8,8 @@ const helpers = require("../helpers");
 async function hasVoted(req, res) {
     // These come from the URL path, which is nice!
     const competition = req.params.competition;
-    const category = req.params.category;
 
-    log.info(`Has Voted request for ${competition} and ${category}`);
+    log.info(`Has Voted request for ${competition}`);
 
     // This path uses query parameters
     if (!req.query.user) {
@@ -23,22 +22,21 @@ async function hasVoted(req, res) {
     const userId = req.query.user;
     const entryId = req.query.entryId;
 
-    // These come from the URL so i'm scared that they might be wrong or malicious, here we check if the categories and competitions are valid.
-    if (!helpers.validateVoteTarget(competition, category)) {
-        log.info("Blocking request for invalid competition or category");
-        responses.badRequest(res, "Invalid competition or category, Goodbye");
+    // These come from the URL so i'm scared that they might be wrong or malicious, here we check if the competition is valid.
+    if (!helpers.validateCompetition(competition)) {
+        log.info("Blocking request for invalid competition");
+        responses.badRequest(res, "Invalid competition.");
         return;
     }
 
-    // Here we check, have they voted in this category before, we use the id retrieved from the Neos API as it can be trusted a little more.
+    // Here we check, have they voted in this entry before.
     try {
-        // isAtVotingLimit returns a boolean to check if we're at the voting limit for this competition, category and userId
         const hasVoted = await storage.hasVoted(competition, userId, entryId);
 
         // converts has voted to a string which we use in the return
         const hasVotedResponse = hasVoted ? "Voted" : "Not Voted";
         log.info(
-            `Successful vote state check for ${competition}->${category} and ${userId} state: ${hasVotedResponse}`
+            `Successful vote state check for ${competition}->${entryId} and ${userId} state: ${hasVotedResponse}`
         );
 
         // We use OK because OK means FOUND and not that it is OK for them to vote, in this case 404 or NOT FOUND, means VOTE NOT FOUND as in. YOU CAN VOTE!
