@@ -1,28 +1,30 @@
-const Datastore = require('nedb-promises')
-let datastore = Datastore.create('/path/to/db.db');
+const Datastore = require("nedb-promises");
+let datastore = Datastore.create("/path/to/db.db");
 
-const config = require('config');
+const config = require("config");
 
-const dbPath = config.get('dbPath');
+const dbPath = config.get("dbPath");
 
 // Dictionary system which again provides or creates SQLite Storage providers for writing to our Database
 const storageProviders = {};
 
-const log = require('./log');
+const log = require("./log");
 
-function getStorageProvider(competition,type) {
+function getStorageProvider(competition, type) {
     if (!storageProviders[competition]) {
         storageProviders[competition] = {};
     }
     if (!storageProviders[competition][type]) {
-        storageProviders[competition][type] = Datastore.create(`${dbPath}${competition}_${type}.db`);
+        storageProviders[competition][type] = Datastore.create(
+            `${dbPath}${competition}_${type}.db`
+        );
     }
     return storageProviders[competition][type];
 }
 
 // Stores the fact that a user id that's given has voted
 async function storeVote(competition, vote) {
-    const provider = getStorageProvider(competition,'votes');
+    const provider = getStorageProvider(competition, "votes");
     return await provider.insert(vote);
 }
 
@@ -35,21 +37,21 @@ async function deleteUser(competition, category, userId) {
 }
 
 async function hasEntry(competition, entryId) {
-    const provider = getStorageProvider(competition,'entries');
-    const res = await provider.count({entryId}).exec()
+    const provider = getStorageProvider(competition, "entries");
+    const res = await provider.count({ entryId }).exec();
     return res > 0;
 }
 
 async function storeEntry(competition, entry) {
-    const provider = getStorageProvider(competition,'entries');
+    const provider = getStorageProvider(competition, "entries");
     return await provider.insert(entry);
 }
 
 // Converts, the result of getVotedState into a boolean.
 async function hasVoted(competition, userId, entryId) {
-    const provider = getStorageProvider(competition, 'votes');
+    const provider = getStorageProvider(competition, "votes");
 
-    const res = await provider.find({userId,entryId}).exec();
+    const res = await provider.find({ userId, entryId }).exec();
     return res.length > 0;
 }
 
@@ -59,4 +61,4 @@ module.exports = {
     deleteUser,
     storeEntry,
     hasEntry,
-}
+};

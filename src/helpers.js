@@ -1,4 +1,4 @@
-const config = require('config');
+const config = require("config");
 
 // Given a body array(usually sourced from CSV), and an object key for that array convert the array into an object.
 // For example giving it ['potato', 4] as a body array and ['vegetable','amount'] as a params key you get an object
@@ -6,23 +6,28 @@ const config = require('config');
 function convertArray(paramsKey, body) {
     // Weird lengths can mess with the array so we block them here.
     if (body.length !== paramsKey.length) {
-        throw new Error(`Invalid Request Body, Expected: ${paramsKey.length} params but got ${body.length} params.`);
+        throw new Error(
+            `Invalid Request Body, Expected: ${paramsKey.length} params but got ${body.length} params.`
+        );
     }
     // Just a simple for loop at this point that maps index to index, key[i] = body[i]
     const ret = {};
-    paramsKey.forEach((value,index) => {
+    paramsKey.forEach((value, index) => {
         ret[value] = body[index];
     });
     return ret;
 }
 
-const competitions = config.get('competitions');
-const categories = config.get('categories');
+const competitions = config.get("competitions");
+const categories = config.get("categories");
 const mainCategories = Object.keys(categories);
 
 // Is this a valid competition and category, uses the configuration files
 function validateVoteTarget(competition, incomingCategories) {
-    return competitions.includes(competition) && validateCategories(incomingCategories);
+    return (
+        competitions.includes(competition) &&
+        validateCategories(incomingCategories)
+    );
 }
 
 /*
@@ -35,7 +40,11 @@ function validateCategories(incomingCategories) {
 
     // Check for invalid subcategories.
     const subcategories = categories[incomingCategories.category];
-    if(!subcategories.includes(incomingCategories.subcategory) && subcategories.length > 0) return false;
+    if (
+        !subcategories.includes(incomingCategories.subcategory) &&
+        subcategories.length > 0
+    )
+        return false;
 
     return true;
 }
@@ -43,19 +52,24 @@ function validateCategories(incomingCategories) {
 // Just a helper function to ensure we're getting these in a standard format that won't break anywhere else.
 function extractCategories(req) {
     const ret = {};
-    if(req.params.category) {
+    if (req.params.category) {
         ret.category = req.params.category;
     }
-    if(req.params.subcategory) {
+    if (req.params.subcategory) {
         ret.subcategory = req.params.subcategory;
     }
     return ret;
 }
 
 // Simple includes check for if this vote target is blocked from voting in the config.
-const blocked = config.get('blocked');
+const blocked = config.get("blocked");
 function isBlocked(voteTarget) {
     return blocked.includes(voteTarget);
 }
 
-module.exports = { convertArray, validateVoteTarget, isBlocked, extractCategories };
+module.exports = {
+    convertArray,
+    validateVoteTarget,
+    isBlocked,
+    extractCategories,
+};

@@ -1,29 +1,32 @@
 // Just a series of shortcut functions which return various error codes. Lets me pick them up in logix more easily.
-function serverError(res, msg = 'Try again later, your vote has NOT been cast') {
+function serverError(
+    res,
+    msg = "Try again later, your vote has NOT been cast"
+) {
     respond(res, msg, 500);
 }
 
-function notAuthorized(res, msg = 'Not Authorized') {
+function notAuthorized(res, msg = "Not Authorized") {
     respond(res, msg, 401);
 }
 
-function badRequest(res, msg = 'Bad Request') {
+function badRequest(res, msg = "Bad Request") {
     respond(res, msg, 400);
 }
 
-function notFound(res, msg = 'Not Found') {
+function notFound(res, msg = "Not Found") {
     respond(res, msg, 404);
 }
 
-function forbidden(res, msg ='Forbidden') {
+function forbidden(res, msg = "Forbidden") {
     respond(res, msg, 403);
 }
 
-function created(res, msg='Voted, Thank you') {
+function created(res, msg = "Voted, Thank you") {
     respond(res, msg, 201);
 }
 
-function ok(res, msg = 'Ok') {
+function ok(res, msg = "Ok") {
     respond(res, msg, 200);
 }
 
