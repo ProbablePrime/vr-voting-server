@@ -55,10 +55,28 @@ async function hasVoted(competition, userId, entryId) {
     return res > 0;
 }
 
+
+async function getEntries(competition) {
+    const provider = getStorageProvider(competition, "entries");
+
+    const res = await provider.find({}).exec();
+    return res;
+}
+
+async function countVotes(competition, entryId) {
+    const provider = getStorageProvider(competition, "votes");
+
+    const res = await provider.count({ entryId }).exec();
+
+    return res;
+}
+
 module.exports = {
     storeVote,
     hasVoted,
     deleteUser,
     storeEntry,
     hasEntry,
+    getEntries,
+    countVotes
 };
