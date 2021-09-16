@@ -15,4 +15,8 @@ function outputCSV(filename, array) {
     fs.writeFileSync(`${resultsPath}${filename}.csv`, csv);
 }
 
-module.exports = {outputCSV};
+function clearCSV(filename) {
+    fs.unlinkSync(`${resultsPath}${filename}.csv`);
+}
+
+module.exports = {outputCSV, clearCSV};

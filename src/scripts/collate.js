@@ -1,4 +1,4 @@
-const { outputCSV } = require("../csv");
+const { outputCSV, clearCSV } = require("../csv");
 const storage = require("../storage");
 
 
@@ -11,9 +11,13 @@ async function main() {
         const totals = await storage.countVotes('mmc2021', entry.entryId);
         res.push({entryId: entry.entryId, votes: totals});
     }
+    clearCSV('mmc2021results');
+    clearCSV('mmc2021entries');
 
     outputCSV('mmc2021results', res);
     outputCSV('mmc2021entries', entries);
+
+    process.exit();
 }
 
 main();
