@@ -119,7 +119,7 @@ async function handleVote(req, res) {
         return;
     }
 
-    // Here we check, have they voted in this category before, we use the id retrieved from the Neos API as it can be trusted a little more.
+    // Here we check, have they voted for this entry before, we use the id retrieved from the Neos API as it can be trusted a little more.
     /// HAS VOTED FOR?
     try {
         // Returns a boolean, seeing if the user has voted.
@@ -131,7 +131,7 @@ async function handleVote(req, res) {
         if (hasVoted) {
             // Block the request because they have voted before.
             log.info(
-                `Blocking request for ${neosUser.username} and ${incomingVote.entryId}. They have voted before.`
+                `Blocking request for ${neosUser.username} and ${incomingVote.entryId}. They have voted before for this entry before.`
             );
             responses.forbidden(
                 res,
