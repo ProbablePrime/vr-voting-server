@@ -2,6 +2,8 @@
 
 This is my voting server for Neos and the Metaverse Maker Competition which ran in September 2020. In this competition we wanted to allow the Neos community to vote for worlds within neos. This required a lot of work both inside Neos and outside of it so this is only half of the equation. More information is due to follow at a later date including a walk through of how the systems work.
 
+There's a brief functional overview here: https://youtu.be/K6kZ6PZabpQ a more technical one will follow soon.
+
 ## Dos and Don'ts
 
 ### DO
