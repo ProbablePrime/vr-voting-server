@@ -4,13 +4,27 @@
         "localhost",
         "::ffff:127.0.0.1"
     ],
-    "categories": [
-        "avatar",
-        "world",
-        "other"
-    ],
+    "categories": {
+        "avatar": [
+            "avatars",
+            "accessories",
+            "misc"
+        ],
+        "world": [
+            "social",
+            "game",
+            "misc"
+        ],
+        "other": [
+            "tau",
+            "misc"
+        ],
+        "meme": [
+
+        ]
+    },
     "competitions": [
-        "mmc"
+        "mmc2021"
     ],
     "screenshotsPath": "C://",
     "resultsPath": "results/",
@@ -19,5 +33,6 @@
     "blocked": [
         "12345"
     ],
-    "logStatus": true
+    "logStatus": true,
+    "votingLimit": 5
 }

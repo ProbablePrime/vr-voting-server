@@ -1,23 +1,29 @@
-const config = require('config');
+const config = require("config");
 
-const log = require('../log');
-const { fetchNeosUser } = require('../neosapi');
-const responses = require('../responses');
-const results = require('../results');
-const storage = require('../storage');
-const helpers = require('../helpers')
+const log = require("../log");
+const { fetchNeosUser } = require("../neosapi");
+const responses = require("../responses");
+const storage = require("../storage");
+const helpers = require("../helpers");
 
-const paramsOrder = ['voteTarget', 'username', 'userId', 'machineId', 'sessionId','rawTimestamp'];
+const paramsOrder = [
+    "entryId",
+    "username",
+    "userId",
+    "machineId",
+    "sessionId",
+    "rawTimestamp",
+];
 
 async function handleVote(req, res) {
     // Body is the body of the request, in the case of a vote it contains the vote string from the voting system
     const body = req.body;
 
-    // Due to Neos' limited data handling(COLLECTIONS PLEASE!!) this will be some form of CSV from the voting system.
+    // Due to Neos' limited data handling (COLLECTIONS PLEASE!!) this will be some form of CSV from the voting system.
     // We can't validate this easily but we can try some stuff to double check it looks OK.
     // Only the host can talk to this server by default so its generically OK to assume the data isn't bad.
     // Don't use basically any of this with a non local web server OR do any sort of Identification/Authorization/Authentication or Payment stuff with this
-    const bodyArray = body.split(',');
+    const bodyArray = body.split(",");
 
     // Init this here so we can mess with it later, this lets the try catches work a little better
     let incomingVote = {};
@@ -27,7 +33,7 @@ async function handleVote(req, res) {
         incomingVote = helpers.convertArray(paramsOrder, bodyArray);
     } catch (e) {
         log.warn(e.message);
-        responses.badRequest(res, 'Invalid Request Body');
+        responses.badRequest(res, "Invalid Request Body");
         return;
     }
 
@@ -40,9 +46,11 @@ async function handleVote(req, res) {
         // Comparing both of these in the results file let's us see that the clocks are roughly in sync and that we're not backed up
         // If these are out of date by a large mile then something fishy is going on, we should discount the result.
     } catch (e) {
-        log.warn('Error processing timestamps from request');
+        log.warn("Error processing timestamps from request");
         log.warn(e.message);
-        responses.badRequest('Error processing timestamps in vote request, your vote has not been cast.');
+        responses.badRequest(
+            "Error processing timestamps in vote request, your vote has not been cast."
+        );
         return;
     }
 
@@ -50,65 +58,108 @@ async function handleVote(req, res) {
     Object.freeze(incomingVote);
 
     // Lots of crap can go wrong before we get here, let's let the log file know it was successful. EVERYTHING IS OK ALARM!!
-    log.info('Successfully parsed Neos Incoming vote');
+    log.info("Successfully parsed Neos Incoming vote");
 
     // These come from the URL path, which is nice!
     const competition = req.params.competition;
-    const category = req.params.category;
+    const categories = helpers.extractCategories(req);
 
-    log.info(`Voting request for ${competition} and ${category}`);
+    log.info(
+        `Voting request for ${competition} and ${categories.category}:${categories.subcategory}`
+    );
 
     // These come from the URL so i'm scared that they might be wrong or malicious, here we check if the categories and competitions are valid.
     // These are stored in the configuration file
-    if (!helpers.validateVoteTarget(competition, category)) {
-        log.info('Blocking request for invalid competition or category');
-        responses.badRequest(res, 'Invalid competition or category, Goodbye');
+    if (!helpers.validateVoteTarget(competition, categories)) {
+        log.info("Blocking request for invalid competition or category");
+        responses.badRequest(
+            res,
+            "Invalid competition or category settings. Your vote has not been cast"
+        );
         return;
     }
 
     // Is this entry blocked from voting?
-    if (helpers.isBlocked(incomingVote.voteTarget)) {
-        log.warn(`Blocking vote request with blocked vote target: ${incomingVote.voteTarget}`);
-        responses.forbidden(res, 'You cannot vote for this entry.');
+    // TODO: Re-write this use the new storage system.
+    if (helpers.isBlocked(incomingVote.entryId)) {
+        log.warn(
+            `Blocking vote request with blocked vote target: ${incomingVote.entryId}`
+        );
+        responses.forbidden(res, "You cannot vote for this entry.");
     }
 
     // We'll get the Neos User from the Neos API, this checks that they are a valid user, we also get their registration date
     // The test logic here just allows me to test things. If the competition is my test competition we use dummy users.
     let neosUser;
-    if (competition !== 'test') {
+    if (competition !== "test") {
         try {
             neosUser = await fetchNeosUser(incomingVote.userId);
-        } catch(e) {
-            log.warn('Failed to fetch Neos User from neos API');
+        } catch (e) {
+            log.warn("Failed to fetch Neos User from neos API");
             log.warn(e.message);
             responses.serverError(res);
             return;
         }
     } else {
         // This only happens if the competition id is test.
-        neosUser = {username: incomingVote.username, id:incomingVote.userId, registrationDate: new Date() };
+        neosUser = {
+            username: incomingVote.username,
+            id: incomingVote.userId,
+            registrationDate: new Date(),
+        };
     }
 
     // If our username from Neos, doesn't match the username returned from the Neos API, it means something has gone wrong.
     // Yeah this means something has gone wrong somewhere BAI.
     if (neosUser.username !== incomingVote.username) {
-        log.warn(`Rejecting request as the usernames from Neos don't match the usernames from Neos API`);
-        responses.notAuthorized(res,'Invalid Request, Vote not cast');
+        log.warn(
+            `Rejecting request as the usernames from Neos don't match the usernames from Neos API`
+        );
+        responses.notAuthorized(res, "Invalid Request, Vote not cast");
         return;
     }
 
-    // Here we check, have they voted in this category before, we use the id retrieved from the Neos API as it can be trusted a little more.
+    // Here we check, have they voted for this entry before, we use the id retrieved from the Neos API as it can be trusted a little more.
+    /// HAS VOTED FOR?
     try {
         // Returns a boolean, seeing if the user has voted.
-        const hasVoted = await storage.hasVoted(competition, category, neosUser.id);
+        const hasVoted = await storage.hasVoted(
+            competition,
+            neosUser.id,
+            incomingVote.entryId
+        );
         if (hasVoted) {
             // Block the request because they have voted before.
-            log.info(`Blocking request for ${neosUser.username} who has already voted in ${competition} and ${category}`);
-            responses.forbidden(res, `${neosUser.username} has already voted in the ${competition} competition and ${category} category`);
+            log.info(
+                `Blocking request for ${neosUser.username} and ${incomingVote.entryId}. They have voted before for this entry before.`
+            );
+            responses.forbidden(
+                res,
+                `${neosUser.username} has voted for this entry before`
+            );
             return;
         }
     } catch (e) {
-        log.error('Failed to check voting status, your vote has not been cast');
+        log.error("Failed to check voting status, your vote has not been cast");
+        log.error(e);
+        responses.serverError(res);
+    }
+
+    try {
+        const entryRecorded = await storage.hasEntry(
+            competition,
+            incomingVote.entryId
+        );
+        if (!entryRecorded) {
+            const res = await storage.storeEntry(competition, {
+                entryId: incomingVote.entryId,
+                category: categories.category || "",
+                subcategory: categories.subcategory || "",
+                blocked: false,
+            });
+        }
+    } catch (e) {
+        log.error("Failed to check entry status, your vote has not been cast");
         log.error(e);
         responses.serverError(res);
     }
@@ -116,10 +167,10 @@ async function handleVote(req, res) {
     // Construct the vote, could probably just base this on the incoming vote but I don't want that to have junk so we'll construct that.
     const vote = {};
 
-    // Competition, category, voteTarget
     vote.competition = competition;
-    vote.category = category;
-    vote.voteTarget = incomingVote.voteTarget;
+    vote.category = categories.category;
+    vote.subcategory = categories.subcategory;
+    vote.entryId = incomingVote.entryId;
 
     // Username, userId, machineId, Registration date
     vote.username = neosUser.username;
@@ -132,39 +183,33 @@ async function handleVote(req, res) {
     vote.arrivedTimeStamp = incomingVote.arrivedTimeStamp;
     vote.sessionId = incomingVote.sessionId;
 
-    // This will be the final CSV ordering
-    // Competition, category, voteTarget, Username, userId, machineId, Registration date,Received timestamp, arrived timestamp, session id
-
     // Freeze the Object, before we start messing with it. This doesn't do much but i put it here and i don't remember why.
     Object.freeze(vote);
 
     // Here begins the lovely try catch area, so we don't want the server to crash so that's why we're try catching everywhere
     try {
-        // Store the CSV Result
-        log.info(`Recording vote in csv for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
-        await results.storeResult(vote);
+        log.info(
+            `Recording vote for ${competition}->${vote.category}:${vote.subcategory}->${vote.entryId} and ${vote.username}`
+        );
+        await storage.storeVote(competition, vote);
     } catch (e) {
         // This means we screwed up somehow we log the error and then we bail out, we don't mark their vote as cast
-        log.error(`Failed to save vote to CSV for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
+        log.error(
+            `Failed to save vote for ${competition}->${vote.category}:${vote.subcategory}->${vote.entryId} and ${vote.username}`
+        );
         log.error(e);
         responses.serverError(res);
         return;
     }
-    try {
-        // Here we store their vote, this prevents them from voting for this competition and category ever again
-        log.info(`Storing the fact that the user's vote has been recorded for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
-        await storage.storeVoteState(vote.competition, vote.category, vote.userId);
-    } catch (e) {
-        // This means we screwed up somehow we log the error and then we bail out, this is the worst outcome as we're unsure if their vote has been marked
-        // We'll log this to a file and then we can check later, they should be in the CSV at this point anyway...
-        log.error(`Failed to store saved voting state, this will need to be checked`);
-        log.error(e.message);
-        responses.serverError(res);
-        return;
-    }
-    log.info(`Stored successful vote for ${competition}->${category}->${vote.voteTarget} and ${vote.username}`);
+
+    log.info(
+        `Stored successful vote for ${competition}->${vote.category}:${vote.subcategory}->${vote.entryId} and ${vote.username}`
+    );
     // This marks the "Everything is ok mark" past here everything is fine and we don't need to worry.
-    responses.created(res, `Vote cast in ${category} for ${vote.voteTarget},thank you`);
+    responses.created(
+        res,
+        `Vote cast in ${vote.category}:${vote.subcategory} for ${vote.entryId},thank you`
+    );
 }
 
 module.exports = handleVote;
