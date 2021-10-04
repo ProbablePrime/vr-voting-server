@@ -31,51 +31,9 @@ For now if you're confident in your ability to hack around ambiguity, you can fo
 5. Run `npm run start` to run the server.
 6. Setup the Neos world, there are no instructions for this at the moment, stand by
 
-## Limits
-
-Users can vote ONCE in each category in each competition. If you have one competition and 3 categories that's a total of THREE votes. For example:
-
-The MMC Competition has 3 Categories, A,B,C and Prime wants to vote, He can only vote ONCE in A, ONCE in B, ONCE in C.
-
-## Results Storage
-
-Results are stored within: `results/<competition name.csv>`, it is formatted as a CSV file without headers. Before processing your results, COPY the file to another location. This server owns the file as it stands within this location and it will not tolerate extra columns, graphs, headers, tabs or anything else. COPY IT BEFORE MODIFICATION.
-
-Results are the following properties in order:
-
-1. competition name - e.g. MMC
-2. Competition category - e.g. avatar
-3. Vote Target - This is the item they are voting for. It is a World ID/Record ID. It does require some converting to turn into a world name but we wanted to be resilient to world name changes. Instructions on how to convert these into world names will be provided later
-4. Username - User's username
-5. User's UserId - This may be different from the username sometimes
-6. machineId - the Profile machine id of the Neos installation. this is not secret or used for anything security wise, it just identifies an installation of Neos. It is not a MAC Address.
-7. Registration date - The registration date of the user, this is public information on the Neos VR API
-8. Received Timestamp - when this vote was made in Neos
-9. Arrived Timestamp - When this vote was accepted by the server
-10. Session Id - the id of the session which this vote was made in
-
-Using the above results information there should be enough information to validate if a vote is trustworthy.
-
-## Vote State Storage
-
-Very Small SQLite Databases in `db/<competition>.db` store the vote state of each user in each category. I don't recommend looking in these files yourself but you can use an SQLite browser to do so. They record a simple boolean for each user's vote status in each competition. Its all automatic, don't touch it that much.
-
-You can clear a vote state using `deletePrime.js` this is currently hard coded to just Prime. It should stay that way. You shouldn't touch your vote system once votes start.
-
 ## Logging
 
 Logs are stored in logs/. A new file is made every hour(this should be each day but i don't know how right now). Logs contain a lot of information. Read them. Everything is automatic.
-
-## Accuracy
-
-Every effort has been made to make this voting system accurate but you MUST still assume each and every vote is not accurate. Check them. Does it look valid:
-
-- Is the user's registration date very close to the start of the competition, do a lot of users have the same registration date
-- Do the User Ids or Usernames look similar or obviously faked
-- Do a lot of votes for the same item occur at the same time
-- Are votes made quickly, as in do they come in at a high speed
-- Is the session id that's stored one of the valid session ids for the world.
-- Do log files exist for the time which the vote was stored. Do they look suspect?
 
 ## Common Questions
 
@@ -106,16 +64,3 @@ Yes!, Add the entries vote target(usually the world id) to the "blocked" array i
 ### How many Mugs were harmed in the making of this?
 
 One :'(
-
-### 2021 Stuff
-
-- Two collections
-  - Votes
-  - Entries
-
-Entries is basically just an index, can we query an index?
-Lets look into Indexing.
-
-Otherwise we pair Entries to votes to perform querying
-Let's also mark votes from judges.
-We'll need a judge config with all of their userids.
