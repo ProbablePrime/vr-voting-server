@@ -151,6 +151,7 @@ async function handleVote(req, res) {
             incomingVote.entryId
         );
         if (!entryRecorded) {
+            //TODO 2022: Let's get the record details here for next year
             const res = await storage.storeEntry(competition, {
                 entryId: incomingVote.entryId,
                 category: categories.category || "",

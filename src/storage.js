@@ -55,11 +55,17 @@ async function hasVoted(competition, userId, entryId) {
     return res > 0;
 }
 
-
 async function getEntries(competition) {
     const provider = getStorageProvider(competition, "entries");
 
     const res = await provider.find({}).exec();
+    return res;
+}
+
+async function updateEntry(competition, entryId, entryData) {
+    const provider = getStorageProvider(competition, "entries");
+
+    const res = await provider.update({entryId}, entryData);
     return res;
 }
 
@@ -71,6 +77,28 @@ async function countVotes(competition, entryId) {
     return res;
 }
 
+//TODO 2022, this is uh just all the votes... we need to distinct by userId....
+async function getUsers(competition) {
+    const provider = getStorageProvider(competition, "votes");
+
+    const res = await provider.find({}).exec();
+
+    return res;
+}
+
+async function countUsers(competition) {
+    const provider = getStorageProvider(competition, "votes");
+
+    const res = await provider.find({}).exec();
+    const ids = {};
+    res.forEach(vote => {
+        if (!ids[vote.userId]) {
+            ids[vote.userId] = 1;
+        }
+    });
+    return Object.keys(ids).length;
+}
+
 module.exports = {
     storeVote,
     hasVoted,
@@ -78,5 +106,8 @@ module.exports = {
     storeEntry,
     hasEntry,
     getEntries,
-    countVotes
+    countVotes,
+    countUsers,
+    updateEntry,
+    getUsers
 };
