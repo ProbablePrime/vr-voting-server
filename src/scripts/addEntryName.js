@@ -1,5 +1,5 @@
-const {fetchNeosRecord, splitEntryId} = require('../neosapi');
-const storage = require("../storage");
+import {fetchNeosRecord, splitEntryId} from '../neosapi.js';
+import * as storage from "../storage";
 
 async function main() {
     const res = [];

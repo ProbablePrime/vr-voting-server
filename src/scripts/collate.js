@@ -1,5 +1,5 @@
-const { outputCSV, clearCSV } = require("../csv");
-const storage = require("../storage");
+import { outputCSV, clearCSV } from "../csv.js";
+import * as storage from "../storage.js";
 
 async function main() {
     const res = [];

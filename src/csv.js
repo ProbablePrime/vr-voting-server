@@ -1,7 +1,6 @@
-const config = require('config');
-const { once } = require('events');
-const fs = require('fs');
-const { parse } = require('json2csv');
+import config from 'config';
+import fs from 'fs';
+import { parse } from 'json2csv';
 
 const resultsPath = config.get('resultsPath');
 
@@ -10,13 +9,11 @@ const CR = '\r'
 const LF = '\n'
 const CRLF = CR + LF;
 
-function outputCSV(filename, array) {
+export function outputCSV(filename, array) {
     const csv = parse(array, {header: true});
     fs.writeFileSync(`${resultsPath}${filename}.csv`, csv);
 }
 
-function clearCSV(filename) {
+export function clearCSV(filename) {
     fs.unlinkSync(`${resultsPath}${filename}.csv`);
 }
-
-module.exports = {outputCSV, clearCSV};

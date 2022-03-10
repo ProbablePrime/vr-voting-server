@@ -1,7 +1,7 @@
 
-const fs = require('fs');
+import fs from 'fs';
 
-const COMP = 'mmc2021';
+const COMP = 'mmc2022';
 
 function backup(filename) {
     fs.copyFileSync('./db/' + filename + '.db', './backup/' + filename + new Date().getTime().toString() + '.db');
