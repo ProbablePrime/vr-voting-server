@@ -80,7 +80,6 @@ async function handleVote(req, res) {
     }
 
     // Is this entry blocked from voting?
-    // TODO: Re-write this use the new storage system.
     if (helpers.isBlocked(incomingVote.entryId)) {
         log.warn(
             `Blocking vote request with blocked vote target: ${incomingVote.entryId}`
@@ -151,11 +150,17 @@ async function handleVote(req, res) {
             incomingVote.entryId
         );
         if (!entryRecorded) {
-            //TODO 2022: Let's get the record details here for next year
+            const parts = splitEntryId(entry.entryId);
+            const record = await fetchNeosRecord(parts.userId, parts.recordId);
+            entry.name = record.name;
+            entry.tags = record.tags
+
             const res = await storage.storeEntry(competition, {
                 entryId: incomingVote.entryId,
                 category: categories.category || "",
                 subcategory: categories.subcategory || "",
+                name: record.name,
+                tags: record.tags,
                 blocked: false,
             });
         }

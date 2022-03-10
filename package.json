@@ -1,5 +1,6 @@
 {
   "name": "neos-voting-server",
+  "type": "module",
   "description": "A voting server which handles voting in Neos based competitions",
   "author": "ProbablePrime <prime@ahref.co.uk>",
   "license": "MIT",

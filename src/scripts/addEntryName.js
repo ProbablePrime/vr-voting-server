@@ -1,4 +1,4 @@
-const {fetchNeosRecord} = require('../neosapi');
+const {fetchNeosRecord, splitEntryId} = require('../neosapi');
 const storage = require("../storage");
 
 async function main() {
@@ -6,8 +6,8 @@ async function main() {
     const entries = await storage.getEntries('mmc2021');
     let totalVotes = 0;
     for (let entry of entries) {
-        const parts = entry.entryId.split(':');
-        const record = await fetchNeosRecord(parts[0], parts[1]);
+        const parts = splitEntryId(entry.entryId);
+        const record = await fetchNeosRecord(parts.userId, parts.recordId);
         entry.name = record.name;
         entry.tags = record.tags
         await storage.updateEntry('mmc2021', entry.entryId, entry);

@@ -1,4 +1,4 @@
-const fetch = require("node-fetch");
+import fetch from "node-fetch";
 
 const userPath = "https://www.neosvr-api.com/api/users/";
 
@@ -11,4 +11,12 @@ async function fetchNeosRecord(userId, recordId) {
     return fetch(`${userPath}${userId}/records/${recordId}`).then((res) => res.json());
 }
 
-module.exports = { fetchNeosUser, fetchNeosRecord };
+function splitEntryId(entryId) {
+    const parts = entryId.split(':');
+    return {
+        userId: parts[0],
+        recordId: parts[1]
+    }
+}
+
+module.exports = { fetchNeosUser, fetchNeosRecord, splitEntryId };
