@@ -1,46 +1,36 @@
 // Just a series of shortcut functions which return various error codes. Lets me pick them up in logix more easily.
-function serverError(
+export function serverError(
     res,
     msg = "Try again later, your vote has NOT been cast"
 ) {
     respond(res, msg, 500);
 }
 
-function notAuthorized(res, msg = "Not Authorized") {
+export function notAuthorized(res, msg = "Not Authorized") {
     respond(res, msg, 401);
 }
 
-function badRequest(res, msg = "Bad Request") {
+export function badRequest(res, msg = "Bad Request") {
     respond(res, msg, 400);
 }
 
-function notFound(res, msg = "Not Found") {
+export function notFound(res, msg = "Not Found") {
     respond(res, msg, 404);
 }
 
-function forbidden(res, msg = "Forbidden") {
+export function forbidden(res, msg = "Forbidden") {
     respond(res, msg, 403);
 }
 
-function created(res, msg = "Voted, Thank you") {
+export function created(res, msg = "Voted, Thank you") {
     respond(res, msg, 201);
 }
 
-function ok(res, msg = "Ok") {
+export function ok(res, msg = "Ok") {
     respond(res, msg, 200);
 }
 
-function respond(res, msg, code) {
+export function respond(res, msg, code) {
     res.statusCode = code;
     res.end(msg);
 }
-
-module.exports = {
-    serverError,
-    notAuthorized,
-    badRequest,
-    forbidden,
-    ok,
-    notFound,
-    created,
-};

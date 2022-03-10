@@ -1,9 +1,9 @@
-const log = require("../log");
-const responses = require("../responses");
+import {log } from "../log.js";
+import * as responses from "../responses.js";
 
-const config = require("config");
+import config from "config";
 
-function state(req, res) {
+export function state(req, res) {
     if (req.query.sessionId) {
         logStatus(`Got State request for Session Id: ${req.query.sessionId}`);
     } else {
@@ -21,5 +21,3 @@ function logStatus(msg) {
     if (!shouldLogStatus) return;
     log.info(msg);
 }
-
-module.exports = state;

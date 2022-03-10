@@ -1,10 +1,8 @@
-const config = require("config");
-
-const log = require("../log");
-const { fetchNeosUser } = require("../neosapi");
-const responses = require("../responses");
-const storage = require("../storage");
-const helpers = require("../helpers");
+import {log} from "../log.js";
+import { fetchNeosUser, splitEntryId, fetchNeosRecord } from "../neosapi.js";
+import * as responses from "../responses.js";
+import * as storage from "../storage.js";
+import * as helpers from "../helpers.js";
 
 const paramsOrder = [
     "entryId",
@@ -15,7 +13,7 @@ const paramsOrder = [
     "rawTimestamp",
 ];
 
-async function handleVote(req, res) {
+export async function handleVote(req, res) {
     // Body is the body of the request, in the case of a vote it contains the vote string from the voting system
     const body = req.body;
 
@@ -142,6 +140,7 @@ async function handleVote(req, res) {
         log.error("Failed to check voting status, your vote has not been cast");
         log.error(e);
         responses.serverError(res);
+        return;
     }
 
     try {
@@ -150,10 +149,8 @@ async function handleVote(req, res) {
             incomingVote.entryId
         );
         if (!entryRecorded) {
-            const parts = splitEntryId(entry.entryId);
+            const parts = splitEntryId(incomingVote.entryId);
             const record = await fetchNeosRecord(parts.userId, parts.recordId);
-            entry.name = record.name;
-            entry.tags = record.tags
 
             const res = await storage.storeEntry(competition, {
                 entryId: incomingVote.entryId,
@@ -168,6 +165,7 @@ async function handleVote(req, res) {
         log.error("Failed to check entry status, your vote has not been cast");
         log.error(e);
         responses.serverError(res);
+        return;
     }
 
     // Construct the vote, could probably just base this on the incoming vote but I don't want that to have junk so we'll construct that.
@@ -217,5 +215,3 @@ async function handleVote(req, res) {
         `Vote cast in ${vote.category}:${vote.subcategory} for ${vote.entryId},thank you`
     );
 }
-
-module.exports = handleVote;

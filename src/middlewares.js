@@ -1,18 +1,18 @@
-const localhost = require("local-hostname");
-const config = require("config");
+import localhost from "local-hostname";
+import config from "config"
 
-const log = require("./log");
-const responses = require("./responses");
+import {log} from "./log.js";
+import * as responses from "./responses.js";
 
 const allowedHosts = config.get("allowedHosts");
 
-const logStartMiddleware = (req, res, next) => {
+export const logStartMiddleware = (req, res, next) => {
     log.info(`New request for ${req.method}, ${req.url}`);
     next();
 };
 
 // This basically checks if the IP/Host is local, It isn't secure at all but helps a little bit. Don't use it for anything security like
-const authorizeMiddleware = (req, res, next) => {
+export const authorizeMiddleware = (req, res, next) => {
     // Checks if this request looks like a proxied request, this isn't good enough
     if (req.headers["x-forwarded-for"]) {
         //bail here
@@ -39,5 +39,3 @@ const authorizeMiddleware = (req, res, next) => {
     }
     next();
 };
-
-module.exports = { logStartMiddleware, authorizeMiddleware };

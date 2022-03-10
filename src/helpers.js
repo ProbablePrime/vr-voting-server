@@ -1,9 +1,9 @@
-const config = require("config");
+import config from "config";
 
 // Given a body array(usually sourced from CSV), and an object key for that array convert the array into an object.
 // For example giving it ['potato', 4] as a body array and ['vegetable','amount'] as a params key you get an object
 // {"vegetable":"potato", "amount": 4}, JSON is easier to work with.
-function convertArray(paramsKey, body) {
+export function convertArray(paramsKey, body) {
     // Weird lengths can mess with the array so we block them here.
     if (body.length !== paramsKey.length) {
         throw new Error(
@@ -23,14 +23,14 @@ const categories = config.get("categories");
 const mainCategories = Object.keys(categories);
 
 // Is this a valid competition and category, uses the configuration files
-function validateVoteTarget(competition, incomingCategories) {
+export function validateVoteTarget(competition, incomingCategories) {
     return (
         validateCompetition(competition) &&
         validateCategories(incomingCategories)
     );
 }
 
-function validateCompetition(competition) {
+export function validateCompetition(competition) {
     return competitions.includes(competition);
 }
 
@@ -38,7 +38,7 @@ function validateCompetition(competition) {
  * Categories got a little more complicated this year as we now have subcategories. This is ok as we now have code to check they are ok.
  * one category "meme" doesn't have subcategories, so we just check if the config for a category has subcategories.
  */
-function validateCategories(incomingCategories) {
+export function validateCategories(incomingCategories) {
     // Invalid main category.
     if (!mainCategories.includes(incomingCategories.category)) return false;
 
@@ -54,7 +54,7 @@ function validateCategories(incomingCategories) {
 }
 
 // Just a helper function to ensure we're getting these in a standard format that won't break anywhere else.
-function extractCategories(req) {
+export function extractCategories(req) {
     const ret = {};
     if (req.params.category) {
         ret.category = req.params.category;
@@ -67,14 +67,6 @@ function extractCategories(req) {
 
 // Simple includes check for if this vote target is blocked from voting in the config.
 const blocked = config.get("blocked");
-function isBlocked(voteTarget) {
+export function isBlocked(voteTarget) {
     return blocked.includes(voteTarget);
 }
-
-module.exports = {
-    convertArray,
-    validateVoteTarget,
-    isBlocked,
-    extractCategories,
-    validateCompetition,
-};

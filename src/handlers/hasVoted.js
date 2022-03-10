@@ -1,11 +1,9 @@
-const config = require("config");
+import {log} from "../log.js";
+import * as responses from "../responses.js";
+import * as storage from "../storage.js";
+import * as helpers from "../helpers.js";
 
-const log = require("../log");
-const responses = require("../responses");
-const storage = require("../storage");
-const helpers = require("../helpers");
-
-async function hasVoted(req, res) {
+export async function hasVoted(req, res) {
     // These come from the URL path, which is nice!
     const competition = req.params.competition;
 
@@ -52,5 +50,3 @@ async function hasVoted(req, res) {
         responses.serverError(res);
     }
 }
-
-module.exports = hasVoted;

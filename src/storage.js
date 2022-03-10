@@ -1,16 +1,16 @@
-const Datastore = require("nedb-promises");
+import Datastore from "nedb-promises";
 let datastore = Datastore.create("/path/to/db.db");
 
-const config = require("config");
+import config from "config";
 
 const dbPath = config.get("dbPath");
 
 // Dictionary system which again provides or creates SQLite Storage providers for writing to our Database
 const storageProviders = {};
 
-const log = require("./log");
+//import {log} from "./log";
 
-function getStorageProvider(competition, type) {
+export function getStorageProvider(competition, type) {
     if (!storageProviders[competition]) {
         storageProviders[competition] = {};
     }
@@ -23,53 +23,53 @@ function getStorageProvider(competition, type) {
 }
 
 // Stores the fact that a user id that's given has voted
-async function storeVote(competition, vote) {
+export async function storeVote(competition, vote) {
     const provider = getStorageProvider(competition, "votes");
     return await provider.insert(vote);
 }
 
 // This is just used in debug scripts, it logs to the file as a warning
-async function deleteUser(competition, category, userId) {
+export async function deleteUser(competition, category, userId) {
     // This is broken right now TODO
     // log.warn(`Deleting ${competition}->${category}->${userId}, this shouldn't usually happen.`);
     // const provider = getStorageProvider(competition);
     // return provider.delete(getVotingKey(userId, category));
 }
 
-async function hasEntry(competition, entryId) {
+export async function hasEntry(competition, entryId) {
     const provider = getStorageProvider(competition, "entries");
     const res = await provider.count({ entryId }).exec();
     return res > 0;
 }
 
-async function storeEntry(competition, entry) {
+export async function storeEntry(competition, entry) {
     const provider = getStorageProvider(competition, "entries");
     return await provider.insert(entry);
 }
 
 // Converts, the result of getVotedState into a boolean.
-async function hasVoted(competition, userId, entryId) {
+export async function hasVoted(competition, userId, entryId) {
     const provider = getStorageProvider(competition, "votes");
 
     const res = await provider.count({ userId, entryId }).exec();
     return res > 0;
 }
 
-async function getEntries(competition) {
+export async function getEntries(competition) {
     const provider = getStorageProvider(competition, "entries");
 
     const res = await provider.find({}).exec();
     return res;
 }
 
-async function updateEntry(competition, entryId, entryData) {
+export async function updateEntry(competition, entryId, entryData) {
     const provider = getStorageProvider(competition, "entries");
 
     const res = await provider.update({entryId}, entryData);
     return res;
 }
 
-async function countVotes(competition, entryId) {
+export async function countVotes(competition, entryId) {
     const provider = getStorageProvider(competition, "votes");
 
     const res = await provider.count({ entryId }).exec();
@@ -78,7 +78,7 @@ async function countVotes(competition, entryId) {
 }
 
 //TODO 2022, this is uh just all the votes... we need to distinct by userId....
-async function getUsers(competition) {
+export async function getUsers(competition) {
     const provider = getStorageProvider(competition, "votes");
 
     const res = await provider.find({}).exec();
@@ -86,7 +86,7 @@ async function getUsers(competition) {
     return res;
 }
 
-async function countUsers(competition) {
+export async function countUsers(competition) {
     const provider = getStorageProvider(competition, "votes");
 
     const res = await provider.find({}).exec();
@@ -98,16 +98,3 @@ async function countUsers(competition) {
     });
     return Object.keys(ids).length;
 }
-
-module.exports = {
-    storeVote,
-    hasVoted,
-    deleteUser,
-    storeEntry,
-    hasEntry,
-    getEntries,
-    countVotes,
-    countUsers,
-    updateEntry,
-    getUsers
-};

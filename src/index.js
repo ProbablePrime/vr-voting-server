@@ -1,19 +1,16 @@
-const polka = require("polka");
-const config = require("config");
-const bodyParser = require("body-parser");
+import polka from "polka";
+import config from "config";
+import bodyParser from "body-parser";
 
-const log = require("./log");
-const handleVote = require("./handlers/handleVote");
-const hasVoted = require("./handlers/hasVoted");
-const state = require("./handlers/state");
+import {log} from "./log.js";
+import {handleVote} from "./handlers/handleVote.js";
+import {hasVoted} from "./handlers/hasVoted.js";
+import {state} from "./handlers/state.js";
 
-const responses = require("./responses");
-
-const {
+import {
     logStartMiddleware,
-    authorizeMiddleware,
-    parseBodyMiddleware,
-} = require("./middlewares");
+    authorizeMiddleware
+} from "./middlewares.js";
 
 const port = config.get("port");
 
