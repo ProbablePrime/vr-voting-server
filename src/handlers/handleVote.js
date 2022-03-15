@@ -143,15 +143,20 @@ export async function handleVote(req, res) {
         return;
     }
 
+    // For 2021 and beyond we wanted to add entry data to the sheet this takes care of this.
     try {
+        // Have we already stored this entry?
         const entryRecorded = await storage.hasEntry(
             competition,
             incomingVote.entryId
         );
         if (!entryRecorded) {
+            // No? Ok, let's find it!
             const parts = splitEntryId(incomingVote.entryId);
             const record = await fetchNeosRecord(parts.userId, parts.recordId);
 
+            // Once we have it store it.
+            // TODO 2023, filter RTF tags
             const res = await storage.storeEntry(competition, {
                 entryId: incomingVote.entryId,
                 category: categories.category || "",
