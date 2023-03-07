@@ -10,7 +10,8 @@
     "fmt": "npx prettier --write **/*.js",
     "deps:update": "ncu -u",
     "start": "node src/index.js",
-    "collate": "node src/scripts/collate.js"
+    "collate": "node src/scripts/collate.js",
+    "backup": "node src/scripts/backup.js"
   },
   "engineStrict": true,
   "engines": {
