@@ -8,7 +8,7 @@
   "main": "src/index.js",
   "scripts": {
     "fmt": "npx prettier --write **/*.js",
-    "deps:update": "ncu -ua",
+    "deps:update": "ncu -u",
     "start": "node src/index.js"
   },
   "engineStrict": true,
