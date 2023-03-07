@@ -1,8 +1,10 @@
+import { stripHtml } from "string-strip-html";
+
 import {log} from "../log.js";
-import { fetchNeosUser, splitEntryId, fetchNeosRecord } from "../neosapi.js";
-import * as responses from "../responses.js";
-import * as storage from "../storage.js";
 import * as helpers from "../helpers.js";
+import { fetchNeosUser, splitEntryId, fetchNeosRecord } from "../neosapi.js";
+import * as storage from "../storage.js";
+import * as responses from "../responses.js";
 
 const paramsOrder = [
     "entryId",
@@ -156,12 +158,11 @@ export async function handleVote(req, res) {
             const record = await fetchNeosRecord(parts.userId, parts.recordId);
 
             // Once we have it store it.
-            // TODO 2023, filter RTF tags
             const res = await storage.storeEntry(competition, {
                 entryId: incomingVote.entryId,
                 category: categories.category || "",
                 subcategory: categories.subcategory || "",
-                name: record.name,
+                name: stripHtml(record.name),
                 tags: record.tags,
                 blocked: false,
             });
