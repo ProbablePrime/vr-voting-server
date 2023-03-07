@@ -157,9 +157,8 @@ export async function handleVote(req, res) {
             const parts = splitEntryId(incomingVote.entryId);
             const record = await fetchNeosRecord(parts.userId, parts.recordId);
 
-            console.log(record);
-
             // Once we have it store it.
+            // Strip HTML tags from the name too, this removes Neos RTF tags but does leave spaces. I don't really care about the spaces, this is just for collation.
             const res = await storage.storeEntry(competition, {
                 entryId: incomingVote.entryId,
                 category: categories.category || "",
