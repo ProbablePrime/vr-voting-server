@@ -15,7 +15,7 @@ async function collate(competition) {
         const totals = await storage.countVotes(competition, entry.entryId);
         totalVotes += totals;
         const userId = entry.entryId.split(':')[0];
-        res.push({userId:userId,name:entry.name, entryId: entry.entryId,category:entry.category,subcategory:entry.subcategory, votes: totals});
+        res.push({userId:userId, name:entry.name, entryId: entry.entryId,category:entry.category,subcategory:entry.subcategory, votes: totals});
     }
     //clearCSV('mmc2022results');
     //clearCSV('mmc2022entries');

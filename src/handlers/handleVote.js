@@ -157,12 +157,14 @@ export async function handleVote(req, res) {
             const parts = splitEntryId(incomingVote.entryId);
             const record = await fetchNeosRecord(parts.userId, parts.recordId);
 
+            console.log(record);
+
             // Once we have it store it.
             const res = await storage.storeEntry(competition, {
                 entryId: incomingVote.entryId,
                 category: categories.category || "",
                 subcategory: categories.subcategory || "",
-                name: stripHtml(record.name),
+                name: stripHtml(record.name).result,
                 tags: record.tags,
                 blocked: false,
             });
