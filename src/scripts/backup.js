@@ -1,16 +1,19 @@
 
 import fs from 'fs';
-//TODO: Pull from config
-const COMP = 'mmc2022';
+
+import config from "config";
+
+const competitions = config.get("competitions");
 
 function backup(filename) {
     fs.copyFileSync('./db/' + filename + '.db', './backup/' + filename + new Date().getTime().toString() + '.db');
 }
 
 async function main() {
-    backup(COMP + '_entries');
-    backup(COMP + '_votes');
-
+    for (const competition of competitions) {
+        backup(competition + '_entries');
+        backup(competition + '_votes');
+    }
     process.exit();
 }
 
