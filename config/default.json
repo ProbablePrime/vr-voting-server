@@ -7,7 +7,6 @@
     "categories": {
         "avatar": [
             "avatars",
-            "accessories",
             "misc"
         ],
         "world": [
@@ -21,12 +20,12 @@
         ],
         "meme": [],
         "art": [],
-        "esd": []
+        "esd": [],
+        "narrative"
     },
     "competitions": [
-        "mmc2023"
+        "mmc2024"
     ],
-    "screenshotsPath": "C://",
     "resultsPath": "results/",
     "dbPath":"db/",
     "port": 3000,

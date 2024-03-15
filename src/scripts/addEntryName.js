@@ -1,16 +1,15 @@
-import {fetchNeosRecord, splitEntryId} from '../neosapi.js';
+import {fetchAPIRecord, splitEntryId} from '../api.js';
 import * as storage from "../storage";
 
+const competition = "mmc2024";
 async function main() {
-    const res = [];
-    const entries = await storage.getEntries('mmc2021');
-    let totalVotes = 0;
+    const entries = await storage.getEntries(competition);
     for (let entry of entries) {
         const parts = splitEntryId(entry.entryId);
-        const record = await fetchNeosRecord(parts.userId, parts.recordId);
+        const record = await fetchAPIRecord(parts.userId, parts.recordId);
         entry.name = record.name;
         entry.tags = record.tags
-        await storage.updateEntry('mmc2021', entry.entryId, entry);
+        await storage.updateEntry(competition, entry.entryId, entry);
     }
     process.exit();
 }

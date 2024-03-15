@@ -2,7 +2,7 @@ import { stripHtml } from "string-strip-html";
 
 import {log} from "../log.js";
 import * as helpers from "../helpers.js";
-import { fetchNeosUser, splitEntryId, fetchNeosRecord } from "../neosapi.js";
+import { fetchAPIUser, splitEntryId, fetchAPIRecord } from "../api.js";
 import * as storage from "../storage.js";
 import * as responses from "../responses.js";
 
@@ -19,7 +19,7 @@ export async function handleVote(req, res) {
     // Body is the body of the request, in the case of a vote it contains the vote string from the voting system
     const body = req.body;
 
-    // Due to Neos' limited data handling (COLLECTIONS PLEASE!!) this will be some form of CSV from the voting system.
+    // Due to VR' limited data handling (COLLECTIONS PLEASE!!) this will be some form of CSV from the voting system.
     // We can't validate this easily but we can try some stuff to double check it looks OK.
     // Only the host can talk to this server by default so its generically OK to assume the data isn't bad.
     // Don't use basically any of this with a non local web server OR do any sort of Identification/Authorization/Authentication or Payment stuff with this
@@ -39,7 +39,7 @@ export async function handleVote(req, res) {
 
     // Converts and stores our timestamps. This will fail if rawTimestamp is an invalid date but the error is caught
     try {
-        // This is the timestamp from Neos, when the request was constructed and sent.
+        // This is the timestamp from VR, when the request was constructed and sent.
         incomingVote.receivedTimestamp = new Date(incomingVote.rawTimestamp);
         // This is the timestamp from the webserver, when it approximately receives the request.
         incomingVote.arrivedTimeStamp = new Date();
@@ -58,7 +58,7 @@ export async function handleVote(req, res) {
     Object.freeze(incomingVote);
 
     // Lots of crap can go wrong before we get here, let's let the log file know it was successful. EVERYTHING IS OK ALARM!!
-    log.info("Successfully parsed Neos Incoming vote");
+    log.info("Successfully parsed Incoming vote");
 
     // These come from the URL path, which is nice!
     const competition = req.params.competition;
@@ -87,54 +87,54 @@ export async function handleVote(req, res) {
         responses.forbidden(res, "You cannot vote for this entry.");
     }
 
-    // We'll get the Neos User from the Neos API, this checks that they are a valid user, we also get their registration date
+    // We'll get the User from the API, this checks that they are a valid user, we also get their registration date
     // The test logic here just allows me to test things. If the competition is my test competition we use dummy users.
-    let neosUser;
+    let apiUser;
     if (competition !== "test") {
         try {
-            neosUser = await fetchNeosUser(incomingVote.userId);
+            apiUser = await fetchAPIUser(incomingVote.userId);
         } catch (e) {
-            log.warn("Failed to fetch Neos User from neos API");
+            log.warn("Failed to fetch User from API");
             log.warn(e.message);
             responses.serverError(res);
             return;
         }
     } else {
         // This only happens if the competition id is test.
-        neosUser = {
+        apiUser = {
             username: incomingVote.username,
             id: incomingVote.userId,
             registrationDate: new Date(),
         };
     }
 
-    // If our username from Neos, doesn't match the username returned from the Neos API, it means something has gone wrong.
+    // If our username from VR, doesn't match the username returned from the API, it means something has gone wrong.
     // Yeah this means something has gone wrong somewhere BAI.
-    if (neosUser.username !== incomingVote.username) {
+    if (apiUser.username !== incomingVote.username) {
         log.warn(
-            `Rejecting request as the usernames from Neos don't match the usernames from Neos API`
+            `Rejecting request as the usernames from VR don't match the usernames from API`
         );
         responses.notAuthorized(res, "Invalid Request, Vote not cast");
         return;
     }
 
-    // Here we check, have they voted for this entry before, we use the id retrieved from the Neos API as it can be trusted a little more.
+    // Here we check, have they voted for this entry before, we use the id retrieved from the API as it can be trusted a little more.
     /// HAS VOTED FOR?
     try {
         // Returns a boolean, seeing if the user has voted.
         const hasVoted = await storage.hasVoted(
             competition,
-            neosUser.id,
+            apiUser.id,
             incomingVote.entryId
         );
         if (hasVoted) {
             // Block the request because they have voted before.
             log.info(
-                `Blocking request for ${neosUser.username} and ${incomingVote.entryId}. They have voted before for this entry before.`
+                `Blocking request for ${apiUser.username} and ${incomingVote.entryId}. They have voted before for this entry before.`
             );
             responses.forbidden(
                 res,
-                `${neosUser.username} has voted for this entry before`
+                `${apiUser.username} has voted for this entry before`
             );
             return;
         }
@@ -155,10 +155,10 @@ export async function handleVote(req, res) {
         if (!entryRecorded) {
             // No? Ok, let's find it!
             const parts = splitEntryId(incomingVote.entryId);
-            const record = await fetchNeosRecord(parts.userId, parts.recordId);
+            const record = await fetchAPIRecord(parts.userId, parts.recordId);
 
             // Once we have it store it.
-            // Strip HTML tags from the name too, this removes Neos RTF tags but does leave spaces. I don't really care about the spaces, this is just for collation.
+            // Strip HTML tags from the name too, this removes RTF tags but does leave spaces. I don't really care about the spaces, this is just for collation.
             const res = await storage.storeEntry(competition, {
                 entryId: incomingVote.entryId,
                 category: categories.category || "",
@@ -184,10 +184,10 @@ export async function handleVote(req, res) {
     vote.entryId = incomingVote.entryId;
 
     // Username, userId, machineId, Registration date
-    vote.username = neosUser.username;
-    vote.userId = neosUser.id;
+    vote.username = apiUser.username;
+    vote.userId = apiUser.id;
     vote.machineId = incomingVote.machineId;
-    vote.registrationDate = new Date(neosUser.registrationDate);
+    vote.registrationDate = new Date(apiUser.registrationDate);
 
     // Received timestamp, arrived timestamp, session id
     vote.receivedTimestamp = incomingVote.receivedTimestamp;
