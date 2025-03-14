@@ -21,10 +21,10 @@
         "meme": [],
         "art": [],
         "esd": [],
-        "narrative"
+        "narrative":[]
     },
     "competitions": [
-        "mmc2024"
+        "mmc2025"
     ],
     "resultsPath": "results/",
     "dbPath":"db/",

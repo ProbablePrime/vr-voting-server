@@ -27,7 +27,7 @@ log.info("Starting voting server on port ", port);
 polka()
     .use(bodyParser.text())
     .use(logStartMiddleware)
-    .use(authorizeMiddleware)
+    //.use(authorizeMiddleware) Remove as we're moving to docker
     .post("vote/:competition/:category/:subcategory?", handleVote)
     .get("voted/:competition", hasVoted)
     .get("state", state)
