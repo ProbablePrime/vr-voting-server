@@ -3,6 +3,7 @@ services:
         image: ghcr.io/probableprime/vr-voting-server:latest
         container_name: voting
         pull_policy: always
+        network_mode: host
         volumes:
             - ./db:/home/node/app/db:rw
             - ./logs:/home/node/app/logs:rw
@@ -13,6 +14,8 @@ services:
             - 3000
     headless:
         container_name: resonite-headless
+        pull_policy: always
+        network_mode: host
         image: ghcr.io/voxelbonecloud/resonite-headless-docker:main
         env_file: .env
         environment:
