@@ -1,0 +1,93 @@
+{
+    "loginCredential": "MMC Voting",
+    "loginPassword": "",
+    "startWorlds": [
+      {
+        "isEnabled": true,
+        "autoInviteUsernames": [
+          "ProbablePrime"
+        ],
+        "autoRecover": true,
+        "idleRestartInterval": 1800,
+        "forcedRestartInterval": -1,
+        "saveOnExit": false,
+        "hideFromPublicListing": false,
+        "autosaveInterval": -1.0,
+        "autoSleep": true,
+        "sessionName": "MMC 2025 Voting Hall 1",
+        "description": "Come vote for your favorite MMC entries! Unlimited votes!",
+        "maxUsers": 12,
+        "accessLevel": "RegisteredUsers",
+        "tags": ["mmc25", "voting"],
+        "mobileFriendly": false,
+        "loadWorldURL": "resrec:///G-Creator-Jam/R-efea17d3-f52e-4965-8240-ca438aa46860",
+        "keepOriginalRoles": true,
+        "awayKickMinutes": 2,
+        "defaultUserRoles": {
+          "ProbablePrime":"Admin",
+          "Medra": "Admin"
+        },
+        "customSessionId":"U-MMC-Voting:VotingHall1"
+      },
+      {
+        "isEnabled": false,
+        "autoInviteUsernames": [
+          "ProbablePrime"
+        ],
+        "autoRecover": true,
+        "idleRestartInterval": 1800,
+        "forcedRestartInterval": -1,
+        "saveOnExit": false,
+        "hideFromPublicListing": true,
+        "autosaveInterval": -1.0,
+        "autoSleep": true,
+        "sessionName": "MMC 2025 Voting Hall 2",
+        "description": "Come vote for your favorite MMC entries! Unlimited votes!",
+        "maxUsers": 12,
+        "accessLevel": "RegisteredUsers",
+        "tags": ["mmc25", "voting"],
+        "mobileFriendly": false,
+        "loadWorldURL": "resrec:///G-Creator-Jam/R-efea17d3-f52e-4965-8240-ca438aa46860",
+        "keepOriginalRoles": true,
+        "awayKickMinutes": 2,
+        "defaultUserRoles": {
+         "ProbablePrime":"Admin",
+         "Medra": "Admin"
+        },
+        "customSessionId":"S-U-MMC-Voting:VotingHall2"
+      },
+      {
+        "isEnabled": false,
+        "autoInviteUsernames": [
+          "ProbablePrime"
+        ],
+        "autoRecover": true,
+        "idleRestartInterval": 1800,
+        "forcedRestartInterval": -1,
+        "saveOnExit": false,
+        "hideFromPublicListing": true,
+        "autosaveInterval": -1.0,
+        "autoSleep": true,
+        "sessionName": "MMC 2025 Voting Hall 3",
+        "description": "Come vote for your favorite MMC entries! Unlimited votes!",
+        "maxUsers": 12,
+        "accessLevel": "RegisteredUsers",
+        "tags": ["mmc25", "voting"],
+        "mobileFriendly": false,
+        "loadWorldURL": "resrec:///G-Creator-Jam/R-efea17d3-f52e-4965-8240-ca438aa46860",
+        "keepOriginalRoles": true,
+        "awayKickMinutes": 2,
+        "defaultUserRoles": {
+         "ProbablePrime":"Admin",
+         "Medra": "Admin"
+        },
+        "customSessionId":"S-U-MMC-Voting:VotingHall3"
+      }
+    ],
+    "allowedUrlHosts": [
+      "localhost:3000",
+      "localhost:80",
+      "127.0.0.1:3000",
+      "127.0.0.1:80"
+    ]
+}

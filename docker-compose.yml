@@ -11,4 +11,17 @@ services:
             - 3000:3000
         expose:
             - 3000
+    headless:
+        container_name: resonite-headless
+        image: ghcr.io/voxelbonecloud/resonite-headless-docker:main
+        env_file: .env
+        environment:
+            CONFIG_FILE: Config.json
+        tty: true
+        stdin_open: true
+        user: "1000:1000"
+        volumes:
+            - "./headless/config:/Config:ro"
+            - "./headless/logs:/Logs:rw"
+        restart: on-failure:5
 
